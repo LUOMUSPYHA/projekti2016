@@ -46,7 +46,7 @@ class RequestTesting(TestCase):
 
 	def test_requests_collections_are_shown_in_its_page(self):
 		response = self.client.get('/pyha/request/1')
-		self.assertContains(response, "Pyyntöön sisältyvät aineistot:")
+		self.assertContains(response, "Pyyntöösi sisältyvät havainnot:")
 		self.assertContains(response, "Talvilintulaskenta")
 		self.assertContains(response, "Hatikka.fi")
 		self.assertContains(response, "Lintujen ja nisäkkäiden ruokintapaikkaseuranta")
