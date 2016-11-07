@@ -17,6 +17,8 @@ from pyha.login import log_out
 from pyha.warehouse import store
 from pyha.models import Collection, Request
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from itertools import chain
+from itertools import groupby
 
 @csrf_exempt
 def index(request):
@@ -32,13 +34,20 @@ def index(request):
 		else:
 			title = "Välkommen"
 		hasRole = False
-		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
+		if secrets.ROLE_1 or secrets.ROLE_2 in request.session.get("user_roles", [None]):
                     hasRole = True
-                    
-		if secrets.ROLE_1 in request.session.get("user_role", [None]):
-                    request_list = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(secureReasons__icontains="taxon").values("request")).order_by('-date')
-                    context = {"role": hasRole, "email": request.session["user_email"], "title": title, "maintext": title  + "!", "requests": request_list, "static": settings.STA_URL }
-                    return render(request, 'pyha/role1/index.html', context)
+        if hasRole:
+        	r1 = []
+        	r2 = []
+			if secrets.ROLE_1 in request.session.get("user_role", [None]):
+				r1 = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(secureReasons__icontains="taxon").values("request")).order_by('-date')
+	        if secrets.ROLE_2 in request.session.get("user_role", [None]):
+	        	r2 = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(secureReasons__icontains="CUSTOM",downloadRequestHandler__incontains = str(userId) ).values("request")).order_by('-date')
+	        result_list = list(chain(r1, r2))
+	        request_list = [rows.next() for (key, rows) in groupby(result_list, key=lambda obj: obj.id)] 
+	        context = {"role": hasRole, "email": request.session["user_email"], "title": title, "maintext": title  + "!", "requests": request_list, "static": settings.STA_URL }
+	        return render(request, 'pyha/role1/index.html', context)
+
 		else:
                     request_list = Request.requests.filter(user=userId, status__gte=0).order_by('-date')
                     context = {"role": hasRole, "email": request.session["user_email"], "title": title, "maintext": title  + "!", "requests": request_list, "static": settings.STA_URL }
