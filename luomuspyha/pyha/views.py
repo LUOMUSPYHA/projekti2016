@@ -123,21 +123,17 @@ def show_request(request):
 			if b in filters.json():
 				filterfield = getattr(filtersobject, b)
 				label = getattr(filterfield, "label")
-				if(lang == 'fi'):
-					languagelabel = getattr(label, "fi")
-				elif(lang == 'en'):
-					languagelabel = getattr(label, "en")
-				else:
+				if(lang == 'sw'):
 					languagelabel = getattr(label, "sv")
+				else:
+					languagelabel = getattr(label, request.LANGUAGE_CODE)
 				if "RESOURCE" in getattr(filterfield, "type"):
 					resource = getattr(filterfield, "resource")
 					for k, a in enumerate(getattr(filterList, b)):
-						if(lang == 'fi'):
-							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=fi&access_token="+secrets.TOKEN)
-						elif(lang == 'en'):
-							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=en&access_token="+secrets.TOKEN)
-						else:
+						if(lang == 'sw'):
 							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=sv&access_token="+secrets.TOKEN)
+						else:
+							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN)
 						filternameobject = json.loads(filterfield2.text, object_hook=lambda d: Namespace(**d))
 						filtername = getattr(filternameobject, "name", str(a))
 						filternamelist[k]= filtername
