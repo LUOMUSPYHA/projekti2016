@@ -110,7 +110,6 @@ def show_request(request):
 			if not Request.requests.filter(id=requestNum, user=userId, status__gte=0).exists():
 				return HttpResponseRedirect('/pyha/')
 		userRequest = Request.requests.get(id=requestNum)
-		filterList = json.loads(userRequest.filter_list, object_hook=lambda d: Namespace(**d))
 		if secrets.ROLE_1 in request.session.get("user_role", [None]):
 			collectionList = Collection.objects.filter(request=userRequest.id, secureReasons__icontains="taxon", status__gte=0)
 		else:
@@ -122,36 +121,50 @@ def show_request(request):
 		for collection in collectionList:
 			if('DEFAULT_TAXON_CONSERVATION' in collection.reasons):
 				taxon = True
+		hasRole = False
+		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
+                        hasRole = True
+		context = {"taxon": taxon, "role": hasRole, "email": request.session["user_email"], "userRequest": userRequest, "filters": show_filters(request), "collections": collectionList, "static": settings.STA_URL }
+                    
+		if secrets.ROLE_1 in request.session.get("user_role", [None]):
+                    return render(request, 'pyha/role1/requestview.html', context)
+		else:
+                    if(userRequest.status == 0):
+                        return render(request, 'pyha/requestform.html', context)
+                    else:
+                        return render(request, 'pyha/requestview.html', context)
+
+def show_filters(request):
+		requestNum = os.path.basename(os.path.normpath(request.path))
+		userRequest = Request.requests.get(id=requestNum)
+		filterList = json.loads(userRequest.filter_list, object_hook=lambda d: Namespace(**d))
 		filters = requests.get(settings.LAJIFILTERS_URL)
+		filterResultList = list(range(len(vars(filterList).keys())))
 		lang = request.LANGUAGE_CODE
 		filtersobject = json.loads(filters.text, object_hook=lambda d: Namespace(**d))
-		filterResultList = list(range(len(vars(filterList).keys())))
 		for i, b in enumerate(vars(filterList).keys()):
 			languagelabel = b
 			filternamelist = getattr(filterList, b)
 			if b in filters.json():
 				filterfield = getattr(filtersobject, b)
 				label = getattr(filterfield, "label")
-				if(lang == 'fi'):
-					languagelabel = getattr(label, "fi")
-				elif(lang == 'en'):
-					languagelabel = getattr(label, "en")
-				else:
+				if(lang == 'sw'):
 					languagelabel = getattr(label, "sv")
+				else:
+					languagelabel = getattr(label, request.LANGUAGE_CODE)
 				if "RESOURCE" in getattr(filterfield, "type"):
 					resource = getattr(filterfield, "resource")
 					for k, a in enumerate(getattr(filterList, b)):
-						if(lang == 'fi'):
-							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=fi&access_token="+secrets.TOKEN)
-						elif(lang == 'en'):
-							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=en&access_token="+secrets.TOKEN)
-						else:
+						if(lang == 'sw'):
 							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=sv&access_token="+secrets.TOKEN)
+						else:
+							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN)
 						filternameobject = json.loads(filterfield2.text, object_hook=lambda d: Namespace(**d))
 						filtername = getattr(filternameobject, "name", str(a))
 						filternamelist[k]= filtername
 			tup = (b, filternamelist, languagelabel)
 			filterResultList[i] = tup
+
 		hasRole = False
 		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
 						hasRole = True
@@ -164,7 +177,6 @@ def show_request(request):
 						return render(request, 'pyha/requestform.html', context)
 					else:
 						return render(request, 'pyha/requestview.html', context)
-		
 
 def change_description(request):
 	if request.method == 'POST':
