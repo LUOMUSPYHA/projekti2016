@@ -50,7 +50,7 @@
 				<button data-toggle="collapse" data-target="#filterlist">Pyynnön rajaukset</button>
 				<div id="filterlist" class="collapse">					
 				-->
-				<h3>{% trans "Pyynnön rajaukset" %}:</h3>
+				<h3>{% trans "Pyyntösi rajaukset" %}:</h3>
 
 				<button class= "btn btn-default" data-toggle="collapse" data-target="#filterlist" id="filterbutton">{% trans "Näytä" %}</button>
 				<div id="filterlist" class="collapse">	
@@ -82,9 +82,18 @@
 				<form action="{% url 'pyha:approve' %}" id="requestform" method="post">
 					<div class="form-group">
 					{% if taxon %}
-
 						<h3> 1/3 {% trans "Pyyntöön sisältyy aineistoja, jotka tarvitsevat sensitiivisyysehtojen hyväksymisen" %}:</h3>
-						<button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModalsens">{% trans "Ehdot" %}</button>
+					
+						<button type="button" class="btn btn-default btn-xs" data-toggle="collapse" data-target="#sensitiveInfo"><span class="glyphicon glyphicon-info-sign"></span></button>
+
+						<div id="sensitiveInfo" class="collapse">
+							<p>lisäinfoa sensitiivisyydestä</p>
+						</div>
+
+						<button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="
+						#myModalsens">{% trans "Ehdot" %}</button>
+
+
 						<span id ="statustextsens">{% trans "Et ole hyväksynyt ehtoja" %}</span>
 								<div class="modal fade" id="myModalsens" tabindex="-1" role="dialog" aria-labelledby="sensiModalLabel">
 								  <div class="modal-lg modal-dialog" role="document">
@@ -133,8 +142,9 @@
 							 	{% if collection.customSecured > 0 %}
 							 	<td>
 								<div class="custDeleteContainer">
-									<button onclick="removeCustomButton" id="form{{ forloop.counter0 }}" type="button" ><span class="glyphicon glyphicon-trash"></span></button>
-									Poista aineistonhaltijan salaamat havainnot
+
+									<button type="submit" onclick="removeCustomButton" id="form{{ forloop.counter0 }}" type="button" ><span class="glyphicon glyphicon-trash"></span></button>
+									{% trans "Poista aineistonhaltijan salaamat havainnot" %}
 								</div>
 							</td>
 								{% else %}
@@ -143,22 +153,24 @@
 								<td>{{collection.taxonSecured}}</td>
 								{% if collection.taxonSecured > 0 %}
 							 	<td>
-									<div class="deleteContainer">
-										<button class="removeSensitiveButton" id="form{{ forloop.counter0 }}" type="button" ><span class="glyphicon glyphicon-trash"></span></button>
-										Poista sensitiiviset havainnot
-									</div>
+	 							<form action="/pyha/removeSens" method="post">
+										<input type="hidden" id="collectionId" name="collectionId" value={{collection.id}}>
+										<input type="hidden" id="next" name="next" value={{request.path}}>
+										<input type="submit" id="sss"><span class="glyphicon glyphicon-trash"></span></input>
+										{% trans "Poista sensitiiviset havainnot" %}
+								</form>
 								</td>
 								{% else %}
 								<td></td>
 								{% endif %}
-								{% if 'CUSTOM' in collection.reasons %}
+								{% if collection.customSecured > 0 %}
 								<td><button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModal{{ forloop.counter0 }}">{% trans "Ehdot" %}</button></td>
 								<td><span id ="statustext{{ forloop.counter0 }}">{% trans "Et ole hyväksynyt ehtoja" %}</span></td> 
 								<td>
 								<!-- submit button for hidden delete collection form -->
 								<div class="deleteContainer">
 									<button class="removeCollectionButton" id="form{{ forloop.counter0 }}" type="button" ><span class="glyphicon glyphicon-trash"></span></button>
-									Poista aineistot, joiden ehtoja et halua hyväksyä
+									{% trans "Poista aineistot, joiden ehtoja et halua hyväksyä" %}
 								</div>
 								</td>
 								
@@ -318,7 +330,6 @@
 		$("#descriptionButton").html('Piilota');
 	  });
 	});
-	
 	</script>
 	
 	<script>
