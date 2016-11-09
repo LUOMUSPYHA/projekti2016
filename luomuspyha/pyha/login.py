@@ -19,6 +19,13 @@ def log_in(request, content):
        request.session["user_id"] = content["user"]["qname"]
        request.session["user_name"] = content["user"]["name"]
        request.session["user_email"] = content["user"]["email"]
+       request.session["user_roles"] = content["user"]["roles"]
+       if not request.session["user_roles"]:
+          request.session["user_roles"] = ['user']
+          request.session["user_role"] = 'user'
+       else:
+          request.session["user_role"] = content["user"]["roles"][0]
+          request.session["user_roles"].append('user')
        request.session.set_expiry(3600)
        return True
    return False

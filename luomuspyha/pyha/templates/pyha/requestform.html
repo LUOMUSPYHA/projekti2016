@@ -2,34 +2,7 @@
 {% block content %}
 {% load i18n %}
 
-	<script>
-	  var accepted = [];
-	  function check(counter) { 
-		  approvetext = "{% trans 'Hyväksyit ehdot' %}";
-		  nonapprovetext = "{% trans 'Et ole hyväksynyt ehtoja' %}";
-
-		  if(document.getElementById('checkb'+ counter).checked){
-			  document.getElementById('statustext'+ counter).textContent=approvetext;
-			  accepted[counter] = 1;
-		  }else{
-			  document.getElementById('statustext'+ counter).textContent=nonapprovetext;
-			  accepted[counter] = 0;
-		}
-	  }
-	  function checkForApproval(){
-		var approved = 0;
-		for (i = 0; i < accepted.length; i++){
-		approved += accepted[i];
-		}
-		if(approved > 0){
-			document.getElementById('submit').disabled = false;
-			document.getElementById('submitstatustext').hidden = true;
-		}else{
-			document.getElementById('submit').disabled = true;
-			document.getElementById('submitstatustext').hidden = false;
-		}
-	  }
-	</script>
+	
 	  <div class="container-fluid">
 		<div class="col-sm-9 col-lg-10">
 			<div class="page-header">
@@ -43,7 +16,7 @@
 				
 				<!-- lomake kuvauksen muuttamiseen -->
 				<div id="descriptionEdit" class="collapse" style="margin:20px 0 25px 0">
-					<form class="form-inline" action="/pyha/description" method="post">
+					<form class="form-inline" action="{% url 'pyha:description' %}" method="post" id ="description-form">
 						<div class="form-group">
 							
 							<div class="col-12" style="clear: left;">
@@ -51,7 +24,7 @@
 							</div>
 							
 							<div class="col-12" style="clear: left;">
-								<textarea class="form-control" name = "description" id="description" rows="2" style="width:50%;min-width:300px" >{{userRequest.description}}</textarea>
+								<textarea class="form-control" name = "description" id="description" rows="2" maxlength="200" style="width:50%;min-width:300px" >{{userRequest.description}}</textarea>
 								<!--<input type="text" class="form-control" id="description" name="description" 
 										value={{userRequest.description}} style="width: 300px;height: 50px"> -->
 								<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
@@ -67,10 +40,11 @@
 							<!-- Kuvaus on vapaaehtoinen tapa nimetä pyyntö. Ilman sitä pyynnön otsikkona käytetään päiväystä, jolloin pyyntö on tehty. -->
 							</p>
 						</div>
+						{% csrf_token %}
 					</form>
 				</div>
 					
-				<h2>{{userRequest.date|date:"d.m.Y    h:m"}}</h2>
+				<h2>{{userRequest.date|date:"d.m.Y    h:i"}}</h2>
 		  </div>
 				<!-- suodatinlista -->
 
@@ -91,7 +65,7 @@
 							</tr>	
 							{% for filter in filters %}
 							<tr>	
-								<td rowspan={{filter.1|length}}>{{ filter.0 }}</td>
+								<td rowspan={{filter.1|length}}>{{ filter.2 }}</td>
 								{% for f in filter.1 %}
 								<td>{{ f }}</td>
 							</tr>
@@ -106,12 +80,37 @@
 				</div>
 					
 				<!-- aineistolista -->
-
-				<h2>{% trans "Pyyntöön sisältyvät aineistot" %}:</h2>
-				
-					<form action="/pyha/approve" id="requestform" method="post">
+				{% if collections %}
+				<form action="{% url 'pyha:approve' %}" id="requestform" method="post">
 					<div class="form-group">
-					{% if collections %}	
+					{% if taxon %}
+						<h3>{% trans "Pyyntöön sisältyy aineistoja, jotka tarvitsevat sensitiivisyysehtojen hyväksymisen" %}:</h3>
+						<p>{% trans "Aineistot, jotka sisältävät sensitiivistä tietoa ovat merkattu kuvakkeella"%}. <span class="glyphicon glyphicon-eye-open" style="color:red;"></span></p> 
+						<button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModalsens">{% trans "Ehdot" %}</button>
+						<span id ="statustextsens">{% trans "Et ole hyväksynyt ehtoja" %}</span>
+								<div class="modal fade" id="myModalsens"" tabindex="-1" role="dialog" aria-labelledby="sensiModalLabel">
+								  <div class="modal-lg modal-dialog" role="document">
+									<div class="modal-content">
+									  <div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+										<h4 class="modal-title" id="myModalLabel">{% trans "Sensitiivityyseen liityvät käyttöehdot" %}</h4>
+									  </div>
+									  <div class="modal-body">
+										{% load static %}
+									  <embed src= "{{ static }}pyha/ehdot.pdf" width="100%" height="700" type='application/pdf'>
+									  </div>
+									  <div class="modal-footer">
+										<input type="checkbox" id ="checkbsens" name="checkb" value="sens" onchange="checksens(); checkForApproval();">
+										{% trans "Olen lukenut ja ymmärtänyt ehdot" %}<br>
+										<p></p>
+										<script>checksens();</script>
+										<button type="button" class="btn btn-default" data-dismiss="modal" id=>{% trans "Poistu" %}</button>
+									  </div>
+									</div>
+								  </div>
+								</div>
+				{% endif %}
+				<h2>{% trans "Pyyntöön sisältyvät aineistot" %}:</h2>
 						<table class="table" style="width:100%">
 							<tr style=color:black>
 								<th>{% trans "Nimi" %}</th>
@@ -120,16 +119,26 @@
 								<th>{% trans "Yleisesti salatut" %}</th>
 								<th>{% trans "Ehdot" %}</th>
 								<th>{% trans "Tila" %}</th>
+								<th></th>
 							</tr>	
 							{% for collection in collections %}
 							<tr style="border-bottom:2px solid #456789">
-								<td>{{collection.result.collectionName}}</td>
+								<td>{{collection.result.collectionName}}{% if 'DEFAULT_TAXON_CONSERVATION' in collection.reasons %} <span class="glyphicon glyphicon-eye-open" style="color:red;"></span> {% endif %}</td>
 								<td>{{collection.result.description}}</td>
 								<td>{{collection.customSecured}}</td>
 								<td>{{collection.taxonSecured}}</td>
-								<td><button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModal{{ forloop.counter0 }}">{% trans "Ehdot" %}</button>
+
+								{% if 'CUSTOM' in collection.reasons %}
+								<td><button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModal{{ forloop.counter0 }}">{% trans "Ehdot" %}</button></td>
 								<td><span id ="statustext{{ forloop.counter0 }}">{% trans "Et ole hyväksynyt ehtoja" %}</span></td>
+								<td>
+								<!-- submit button for hidden delete collection form -->
+								<div class="deleteContainer">
+									<button class="removeCollectionButton" id="form{{ forloop.counter0 }}" type="button" ><span class="glyphicon glyphicon-trash"></span></button>
+									Poista aineistot, joiden ehtoja et halua hyväksyä
+								</div>
 								</td>
+								
 								<!-- Modal -->
 								<div class="modal fade" id="myModal{{ forloop.counter0 }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 								  <div class="modal-lg modal-dialog" role="document">
@@ -153,18 +162,27 @@
 									</div>
 								  </div>
 								</div>
+								
+								{% else %}
+								<td></td>
+								<script>checkv({{forloop.counter0}}, 0);</script>
+								<td>Pyyntösi ei sisältänyt aineiston ehtoja.</td>
+								<td></td>
+								{% endif %}
 							</tr>
 							{% endfor %}
 						</table>
+						
 							<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
 
 							<label for="reason">{% trans "Perustelut pyynnölle" %}:</label>
 							
-							<textarea class="form-control" rows="2" id="reason" required placeholder="{% trans 'Pakolliset perustelut' %}"></textarea>
+							<textarea class="form-control" rows="2" id="reason" name="reason" required placeholder="{% trans 'Pakolliset perustelut' %}"></textarea>
 							<button type="submit" id="submit" class="btn btn-default btn-lg">{% trans "Lähetä hyväksyttäväksi" %}</button>
 							<span id ="submitstatustext">{% trans "Sinun pitää hyväksyä vähintään yhdet ehdot" %}</span>
 							<script>checkForApproval();</script>
 						</div>
+						{% csrf_token %}
 					</form>		
 
 					{% else %}
@@ -173,9 +191,76 @@
 		</div>
 
 	  </div>
+	  
+	{% if collections %} 
+	<!-- hidden delete collection forms -->
+	{% for collection in collections %}
+	<form class="form-hidden" action="/pyha/removeCollection" id="deleteform{{ forloop.counter0 }}" method="post">
+		<div class="form-group">
+			<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
+			<input type="hidden" id="collectionid" name="collectionid" value={{collection.address}}>
+			<input type="hidden" id="next" name="next" value={{request.path}}>
+			<input type="submit" class="btn" value="submit!" name="psubmit" Style="display: none;"></button>
+		</div>
+		{% csrf_token %}
+	</form>
+	{% endfor %}
+	{% endif %}
 {% endblock %}
 
 {% block script %}
+
+	<script>
+	  var accepted = [];
+	  var acceptedsens;
+	  function checksens() { 
+		  approvetext = "{% trans 'Hyväksyit ehdot' %}";
+		  nonapprovetext = "{% trans 'Et ole hyväksynyt ehtoja' %}";
+		  if(document.getElementById('checkbsens').checked){
+			  document.getElementById('statustextsens').textContent=approvetext;
+			  acceptedsens = 1;
+		  }else{
+			  document.getElementById('statustextsens').textContent=nonapprovetext;
+			  acceptedsens = 0;
+		}
+	  }
+	  function check(counter) { 
+		  approvetext = "{% trans 'Hyväksyit ehdot' %}";
+		  nonapprovetext = "{% trans 'Et ole hyväksynyt ehtoja' %}";
+		  if(document.getElementById('checkb'+ counter).checked){
+			  document.getElementById('statustext'+ counter).textContent=approvetext;
+			  accepted[counter] = 1;
+		  }else{
+			  document.getElementById('statustext'+ counter).textContent=nonapprovetext;
+			  accepted[counter] = 0;
+		}
+	  }
+	  function checkv(counter, value) { 
+		  accepted[counter] = value;
+	  }
+	  function checkForApproval(){
+		var approved = 0;
+		for (i = 0; i < accepted.length; i++){
+		approved += accepted[i];
+		}
+		approved += acceptedsens;
+		if(approved > 0){
+			document.getElementById('submit').disabled = false;
+			document.getElementById('submitstatustext').hidden = true;
+		}else{
+			document.getElementById('submit').disabled = true;
+			document.getElementById('submitstatustext').hidden = false;
+		}
+	  }
+	</script>
+	
+	<script>
+		$('.deleteContainer').click(function(e){
+			var name ="#delete" + $(this).find('.removeCollectionButton').attr('id');
+			$(name).submit();
+		})
+	</script>
+	
 	<script>
 	$(document).ready(function(){
 	  $("#filterlist").on("hide.bs.collapse", function(){
@@ -207,6 +292,12 @@
 		$("#descriptionButton").html('Piilota');
 	  });
 	});
+	
+	</script>
+	
+	<script>
+	
+	
 	
 	</script>
 {% endblock %}

@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-<html lang="en"><head>
+<html lang="fi"><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -31,13 +31,15 @@
 <!-- <link rel="stylesheet" href="{{ static }}pyha/bootstrap-dataTables/dataTables.bootstrap.min.css"> -->
 
 <link rel="stylesheet" type="text/css" href="{{ static }}pyha/styles.css" >
+
 </head>
+
 <body>
 <nav class="navbar navbar-custom navbar-fixed-top">
     <div class="container">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-          <span class="sr-only">Toggle navigation</span>
+          <span class="sr-only">{% trans "Toggle navigation" %}</span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
@@ -52,8 +54,25 @@
         <ul class="nav navbar-nav navbar-right">
         <li><a class="nohover" >{{email}} <span class="glyphicon glyphicon-user"></span></a></li>
         <li><a href="{% url 'pyha:logout' %}">{% trans "Kirjaudu ulos" %} <span class="glyphicon glyphicon-log-out"></span></a></li>
-
-
+		
+		{% if role %}
+		<div class="dropdown">
+		<form id='role_form' action="{% url 'pyha:change_role' %}" method="post"
+            data-currenturl='{{ request.path }}'
+            data-currentfullurl='{{ request.get_full_path }}'>
+		<button type="button" onclick="roleFunction()" class="dropbtn">{{request.session.user_role}}{% csrf_token %}<span class="glyphicon glyphicon-eye-open"></span></button>
+			<div id="roleDropdown" class="dropdown-content">			
+              {% for role in request.session.user_roles %}
+              <a onclick='roleSubmit("{{ role }}")' name="role" id="role">{{ role }}</a>
+              {% endfor %}
+			  
+			</div>
+		</div>
+		<input type="hidden" id="next" name="next" value={{request.path}}>
+		<input id='role_form_select' name="role" type="hidden" value="">
+		</form>
+		{% endif %}
+		
         {% get_current_language as LANGUAGE %}
 		<div class="dropdown">
 		<form id='language_form' action="{% url 'set_language' %}" method="post"
@@ -82,54 +101,6 @@
   </nav>
 {% block content %}
 {% endblock %}
-<footer class="footer">
-  <div>
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-3">
-          <h3>Suomen Lajitietokeskus</h3>
-          <p>Suomen Lajitietokeskus -hanke kokoaa Suomen eliölajistostatietoa yhteen paikkaan –avoimeen käyttöön. Lue
-            lisää hankkeesta ja sen tavoitteista ja aikatauluista.</p>
-        </div>
-        <div class="col-sm-3">
-          <h3>Tiedonhallinta</h3>
-          <ul>
-            <li>Aineistopolitiikka</li>
-            <li>Tietovarasto</li>
-            <li>Pitkäaikaissäilytys</li>
-            <li>Taksonominen tietokanta</li>
-            <li>Laadunvarmistus</li>
-            <li>Annotointi -keskustelu</li>
-            <li>Sensitiivinen aineisto</li>
-            <li>Käyttölisenssit</li>
-          </ul>
-        </div>
-        <div class="col-sm-3">
-          <h3>Tietotekniset palvelut</h3>
-          <ul>
-            <li>Kokoelmahallinta</li>
-            <li>Havaintopalvelu</li>
-            <li>Analyysipalvelut</li>
-            <li>Aineistojen metatiedot</li>
-            <li>Viranomaispalvelut</li>
-            <li>Digitointi</li>
-            <li>Rajapinnat / API</li>
-          </ul>
-        </div>
-        <div class="col-sm-3">
-          <h3>Muut palvelut</h3>
-          <ul>
-            <li>Vieraslaji.fi</li>
-            <li>BirdLife -Tiira</li>
-            <li>Hyönteistietokanta</li>
-            <li>Perhos…</li>
-            <li>Jne…</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
 
   <!-- Bootstrap core JavaScript
   ================================================== -->
@@ -176,6 +147,15 @@
 		function submit(lang) {
 			document.getElementById("language_form_select").value = lang
 			document.getElementById("language_form").submit()
+		}
+		
+		function roleFunction() {
+		    document.getElementById("roleDropdown").classList.toggle("show");
+		}
+		
+		function roleSubmit(lang) {
+			document.getElementById("role_form_select").value = lang
+			document.getElementById("role_form").submit()
 		}
   </script>
 

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+{% load i18n %}
+{% load static %}
+
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="http://front.laji-test.luomus.fi/favicon.ico">
+
+  <title>{{ title }}</title>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!-- Bootstrap CSS local fallback -->
+  <script>
+    $(document).ready(function() {
+    var bodyColor = $('body').css('color');
+    if(bodyColor != 'rgb(51, 51, 51)') {
+    $("head").prepend('<link rel="{{ static }}pyha/bootstrap-3.3.7/css/bootstrap.min.css">');}});
+  </script>
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+<!-- <link rel="stylesheet" href="{{ static }}pyha/bootstrap-3.3.7/css/bootstrap-theme.min.css"> -->
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+<!-- <link rel="stylesheet" href="{{ static }}pyha/bootstrap-dataTables/dataTables.bootstrap.min.css"> -->
+
+<link rel="stylesheet" type="text/css" href="{{ static }}pyha/styles.css" >
+
+<style>
+  .footer { background-color: #349934 !important; }
+  .navbar-custom {
+    background-color: #349934 !important;
+    border-color: #298829 !important;
+  }
+
+  .navbar-custom .navbar-toggle:focus, .navbar-custom .navbar-toggle:hover {
+    background-color: #298829 !important;
+    border-color: #298829!important;
+  }
+
+  .navbar-custom .navbar-nav>.active>a:not(.nohover), .navbar-custom .navbar-nav>.active>a:focus:not(.nohover),
+  .navbar-custom .navbar-nav>.active>a:hover:not(.nohover), .navbar-custom .navbar-nav > li > a:hover:not(.nohover),
+  .navbar-custom .navbar-brand:hover:not(.nohover), .navbar-custom .navbar-nav>.open>a:not(.nohover),
+  .navbar-custom .navbar-nav>.open>a:focus:not(.nohover), .navbar-custom .navbar-nav>.open>a:hover:not(.nohover) {
+    background-color: #298829 !important;
+  }
+  .nohover{
+	background-color: #349934 !important;
+  }
+
+  .navbar-custom .navbar-toggle, .navbar-custom .navbar-collapse, .navbar-custom .navbar-form {
+    border-color: #298829 !important;
+  }
+    .dropbtn {
+    background-color: #349934 ;
+  }
+
+  .dropbtn:hover, .dropbtn:focus {
+    background-color: #298829;
+  }
+</style>
+
+</head>
+<body>
+<nav class="navbar navbar-custom navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">{% trans "Toggle navigation" %}</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="https://beta.laji.fi/">LAJI.FI</a>
+      </div>
+      {% if email %}
+      <div id="navbar" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="{% url 'pyha:index' %}">{% trans "Pyynnöt" %}</a></li>  
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+        <li><a class="nohover" >{{email}} <span class="glyphicon glyphicon-user"></span></a></li>
+        <li><a href="{% url 'pyha:logout' %}">{% trans "Kirjaudu ulos" %} <span class="glyphicon glyphicon-log-out"></span></a></li>
+
+		{% if role %}
+		<div class="dropdown">
+		<form id='role_form' action="{% url 'pyha:change_role' %}" method="post"
+            data-currenturl='{{ request.path }}'
+            data-currentfullurl='{{ request.get_full_path }}'>
+		<button type="button" onclick="roleFunction()" class="dropbtn">{{request.session.user_role}}{% csrf_token %}<span class="glyphicon glyphicon-eye-open"></span></button>
+			<div id="roleDropdown" class="dropdown-content">			
+              {% for role in request.session.user_roles %}
+              <a onclick='roleSubmit("{{ role }}")' name="role" id="role">{{ role }}</a>
+              {% endfor %}
+			  
+			</div>
+		</div>
+		<input id='role_form_select' name="role" type="hidden" value="">
+		</form>
+		{% endif %}
+
+        {% get_current_language as LANGUAGE %}
+		<div class="dropdown">
+		<form id='language_form' action="{% url 'set_language' %}" method="post"
+            data-currenturl='{{ request.path }}'
+            data-currentfullurl='{{ request.get_full_path }}'>
+		<button type="button" onclick="myFunction()" class="dropbtn">{{LANGUAGE}}{% csrf_token %}<span class="glyphicon glyphicon-globe"></span></button>
+			<div id="myDropdown" class="dropdown-content">
+              {% get_available_languages as LANGUAGES %}
+              {% get_language_info_list for LANGUAGES as languages %}
+              
+              {% for language in languages %}
+              <a onclick='submit("{{ language.code }}")' name="code" id="code">{{ language.code }}</a>
+              {% endfor %}
+			  
+			</div>
+		<input id='language_form_select' name="language" type="hidden" value="">
+		</form>
+          
+      
+
+
+    </ul>
+      </div>
+      {% endif %}
+    </div>
+  </nav>
+{% block content %}
+{% endblock %}
+
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <!-- old <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <!-- jQuery local fallback -->
+  <script>window.jQuery || document.write('<script src="{{ static }}pyha/jquery-3.1.1/jquery.min.js"><\/script>')</script>
+  
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <!-- Bootstrap JS local fallback -->
+  <script>if(typeof($.fn.modal) === 'undefined') {document.write('<script src="{{ static }}pyha/bootstrap-3.3.7/js/bootstrap.min.js"><\/script>')}</script>
+  
+  <!-- jQuery datatables -->
+  <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+  <!-- jQuery-datatables local fallback -->
+  <script>window.jQuery.DataTable || document.write('<script src="{{ static }}pyha/jquery-dataTables/jquery.dataTables.min.js"><\/script>')</script>
+
+
+  <!-- non-cdn ei toimi jostain syystä. Luultavasti puuttuu jotain -->
+  <script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+  <!-- <script src="{{ static }}pyha/boostrap-dataTables/dataTables.bootstrap.min.js"></script> -->
+  
+    <script>
+		function myFunction() {
+		    document.getElementById("myDropdown").classList.toggle("show");
+		}
+		
+		window.onclick = function(event) {
+		  if (!event.target.matches('.dropbtn')) {
+		
+		    var dropdowns = document.getElementsByClassName("dropdown-content");
+		    var i;
+		    for (i = 0; i < dropdowns.length; i++) {
+		      var openDropdown = dropdowns[i];
+		      if (openDropdown.classList.contains('show')) {
+		        openDropdown.classList.remove('show');
+		      }
+		    }
+		  }
+		}
+		
+		function submit(lang) {
+			document.getElementById("language_form_select").value = lang
+			document.getElementById("language_form").submit()
+		}
+		
+		function roleFunction() {
+		    document.getElementById("roleDropdown").classList.toggle("show");
+		}
+		
+		function roleSubmit(lang) {
+			document.getElementById("role_form_select").value = lang
+			document.getElementById("role_form").submit()
+		}
+  </script>
+
+{% block script %}
+{% endblock %}
+
+</body>
+</html>

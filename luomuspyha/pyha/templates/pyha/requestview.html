@@ -15,7 +15,7 @@
 			</h1>
 			<!-- lomake kuvauksen muuttamiseen -->
 				<div id="descriptionEdit" class="collapse" style="margin:20px 0 25px 0">
-					<form class="form-inline" action="/pyha/description" method="post">
+					<form class="form-inline" action="{% url 'pyha:description' %}" method="post" id ="description-form">
 						<div class="form-group">
 							
 							<div class="col-12" style="clear: left;">
@@ -39,10 +39,11 @@
 							<!-- Kuvaus on vapaaehtoinen tapa nimetä pyyntö. Ilman sitä pyynnön otsikkona käytetään päiväystä, jolloin pyyntö on tehty. -->
 							</p>
 						</div>
+						{% csrf_token %}
 					</form>
 				</div>
 					
-				<h2>{{userRequest.date|date:"d.m.Y    h:m"}}</h2>
+				<h2>{{userRequest.date|date:"d.m.Y    h:i"}}</h2>
 			<h3><span style="white-space: nowrap;">(
 					<span
 					{% if userRequest.status == 1 %}
@@ -108,10 +109,74 @@
 				</div>
 					
 				<!-- aineistolista -->
+				
+				{% if collections %}
+					{% if taxon %}
+						<h3>{% trans "Pyyntö sisältää sensitiivistä tietoa" %}:</h3>
+						<p>{% trans "Aineistot, jotka sisältävät sensitiivistä tietoa ovat merkattu kuvakkeella"%}. <span class="glyphicon glyphicon-eye-open" style="color:red;"></span></p> 
+						<button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModalsens">{% trans "Ehdot" %}</button>
+								<div class="modal fade" id="myModalsens"" tabindex="-1" role="dialog" aria-labelledby="sensiModalLabel">
+								  <div class="modal-lg modal-dialog" role="document">
+									<div class="modal-content">
+									  <div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+										<h4 class="modal-title" id="myModalLabel">{% trans "Sensitiivisyyteen liityvät käyttöehdot" %}</h4>
+									  </div>
+									  <div class="modal-body">
+										{% load static %}
+									  <embed src= "{{ static }}pyha/ehdot.pdf" width="100%" height="700" type='application/pdf'>
+									  </div>
+									  <div class="modal-footer">
+										<input type="checkbox" id ="checkbsens" name="checkb" value="sens" onchange="checksens(); checkForApproval();">
+										{% trans "Olen lukenut ja ymmärtänyt ehdot" %}<br>
+										<p></p>
+										<script>checksens();</script>
+										<button type="button" class="btn btn-default" data-dismiss="modal" id=>{% trans "Poistu" %}</button>
+									  </div>
+									</div>
+								  </div>
+								</div>
+							{% if userRequest.sensstatus == 0 %}
+							<h3>{% trans "Et halua sensitiivistä tietoa"%}</h3>
+							{% else %}
+							<h3>{% trans "Päätös sensitiivisen tiedon antamisesta"%}</h3>
+							<table class="table" style="width:100%">
+								<tr style=color:black>
+								<th>{% trans "Status" %}</th>
+								<th>{% trans "Perustelut päätökselle" %}</th>
+								</tr>
+								{% if userRequest.sensstatus == 1 %}
+								<tr class="info clickable-row"
+								{% elif userRequest.sensstatus == 3 %}
+								<tr class="danger clickable-row"
+								{% elif userRequest.sensstatus == 4 %}
+								<tr class="success clickable-row"
+								{% else %}  
+								<tr	
+								{% endif %}
+								>
+								{% if userRequest.sensstatus == 1 %}
+								<td>{% trans "Odottaa aineiston toimittajan käsittelyä" %}</td>
+								{% elif userRequest.sensstatus == 3 %}
+								<td>{% trans "Hylätty" %}</td>
+								{% elif userRequest.sensstatus == 2 %}
+								<td>{% trans "Osittain hyväksytty" %}</td>
+								{% elif userRequest.sensstatus == 4 %}
+								<td>{% trans "Hyväksytty" %}</td>
+								{% else %}  
+								<td>{% trans "Tuntematon" %}</td>	
+								{% endif %}
+								<td>
+								<p>{{userRequest.sensDecisionExplanation}}</p>
+								</td>
+								</tr>
+							</table>
+							{% endif %}
+					{% endif %}
+				<br></br>
 
 				<h2>{% trans "Pyyntöön sisältyvät aineistot" %}:</h2>
 				
-					{% if collections %}	
 						<table class="table" style="width:100%">
 							<tr style=color:black>
 								<th>{% trans "Nimi" %}</th>
@@ -120,19 +185,22 @@
 								<th>{% trans "Yleisesti salatut" %}</th>
 								<th>{% trans "Status" %}</th>
 								<th>{% trans "Ehdot" %}</th>
+								{% if userRequest.status != 1 %}
+								<th>{% trans "Syy" %}</th>
+								{% endif %}
 							</tr>	
 							{% for collection in collections %}
 								{% if collection.status == 1 %}
 								<tr class="info clickable-row"
 								{% elif collection.status == 3 %}
 								<tr class="danger clickable-row"
-								{% elif collection.status == 2 %}
+								{% elif collection.status == 4 %}
 								<tr class="success clickable-row"
 								{% else %}  
 								<tr	
 								{% endif %}
 								>
-								<td>{{collection.result.collectionName}}</td>
+								<td>{{collection.result.collectionName}}{% if 'DEFAULT_TAXON_CONSERVATION' in collection.reasons %} <span class="glyphicon glyphicon-eye-open" style="color:red;"></span> {% endif %}</td>
 								<td>{{collection.result.description}}</td>
 								<td>{{collection.customSecured}}</td>
 								<td>{{collection.taxonSecured}}</td>
@@ -149,7 +217,7 @@
 								{% else %}  
 								<td>{% trans "Tuntematon" %}</td>	
 								{% endif %}
-							<td><button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModal{{ forloop.counter0 }}">{% trans "Ehdot" %}</button></td>
+								<td><button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModal{{ forloop.counter0 }}">{% trans "Ehdot" %}</button></td>
 								<!-- Modal -->
 								<div class="modal fade" id="myModal{{ forloop.counter0 }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 								  <div class="modal-dialog modal-lg" role="document">
@@ -160,7 +228,7 @@
 									  </div>
 									  <div class="modal-body">
 										{% load static %}
-									  <embed src= "{{ static }}pyha/ehdot.pdf" width="800" height="700" type='application/pdf'>
+									  <embed src= "{{ static }}pyha/ehdot.pdf" width="100%" height="700" type='application/pdf'>
 									  </div>
 									  <div class="modal-footer">
 										<button type="button" class="btn btn-default" data-dismiss="modal" id=>{% trans "Poistu" %}</button>
@@ -168,6 +236,9 @@
 									</div>
 								  </div>
 								</div>
+							{% if collection.decisionExplanation %}
+							<td>{{collection.decisionExplanation}}</td>
+							{% endif %}
 							</tr>
 							{% endfor %}
 						</table>

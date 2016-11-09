@@ -39,10 +39,10 @@
         {% else %}  
             <tr	
         {% endif %}
-            data-href="request/{{request.order}}"
+            data-href="request/{{request.id}}"
             >
             <td>{{request.description}}</td>
-            <td>{{request.date|date:"d.m.Y    h:m"}}</td>
+            <td>{{request.date|date:"d.m.Y    h:i"}}</td>
             <td>{{ request.approximateMatches|intcomma|replaceCommaWithSpace }}</td>
             {% if request.status == 0 %}
                 <td>{% trans "Et ole hyväksynyt ehtoja" %}</td>
@@ -58,8 +58,10 @@
 
             {% elif request.status == 4 %}
                 <td>{% trans "Hyväksytty" %}</td>  
+                
             {% else %}  
                 <td>{% trans "Tuntematon" %}</td>	
+                
             {% endif %}
         
             

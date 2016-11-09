@@ -1,0 +1,108 @@
+﻿{% extends "pyha/role1/base.html" %}
+{% block content %}
+{% load i18n %}
+
+
+    <div class="container-fluid">
+    <div class="col-sm-9 col-lg-10">
+      <div class="page-header">
+        <h2>{{maintext}}</h2>
+      </div>
+      {% if requests %}
+      <h2>{% trans "Pyynnöt" %}:</h2>
+  <p class ="text-muted">{% trans "Napsauta pyyntöä nähdäksesi lisätietoja" %}.</p>            
+  <table id="requests-table" class="table table-hover table-bordered">
+    <thead>
+      <tr bgcolor="#349934" style="color:white;">
+        <th>{% trans "Kuvaus" %}</th>
+        <th>{% trans "Päiväys" %}</th>	
+        <th>{% trans "Osumia" %}</th>
+        <th>{% trans "Pyynnön tila" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% load humanize %}
+    <!-- {% load pyha_tags %} -->
+    {% for request in requests %}
+        
+        
+        {% if request.status == 1 %}
+            <tr class="info clickable-row"
+        {% elif request.status == 3 %}
+            <tr class="danger clickable-row"
+        {% elif request.status == 2 %}
+            <tr class="warning clickable-row"
+        {% elif request.status == 0 %}
+            <tr class="active clickable-row"
+        {% elif request.status == 4 %}
+            <tr class="success clickable-row"
+        {% else %}  
+            <tr	
+        {% endif %}
+            data-href="request/{{request.id}}"
+            >
+            <td>{{request.description}}</td>
+            <td>{{request.date|date:"d.m.Y    h:i"}}</td>
+            <td>{{ request.approximateMatches|intcomma|replaceCommaWithSpace }}</td>
+            {% if request.status == 0 %}
+                <td>{% trans "Et ole hyväksynyt ehtoja" %}</td>
+            
+            {% elif request.status == 1 %}
+                <td>{% trans "Odottaa aineiston toimittajan käsittelyä" %}</td>
+                
+            {% elif request.status == 2 %}
+                <td>{% trans "Osittain Hyväksytty" %}</td>
+                
+            {% elif request.status == 3 %}
+                <td>{% trans "Hylätty" %}</td>
+
+            {% elif request.status == 4 %}
+                <td>{% trans "Hyväksytty" %}</td>  
+            {% else %}  
+                <td>{% trans "Tuntematon" %}</td>	
+            {% endif %}
+        
+            
+        </tr>
+        
+	{% endfor %}
+    
+	{% else %}
+		<strong>{% trans "Kannassa ei ole pyyntöjä" %}.</strong>
+	{% endif %}
+    </tbody>
+  </table>
+    </div>
+  <!--
+    <div class="col-sm-3 col-lg-2 side-bar">
+  
+    </div>
+  -->
+  </div>
+{% endblock %}
+
+{% block script %}
+
+<script>
+$(document).ready(function($) {
+    $(".clickable-row").click(function() {
+        window.document.location = $(this).data("href");
+    });
+});
+</script>
+
+<script>
+$(document).ready(function() {
+    $('#requests-table').dataTable( {
+            "language": {
+             {% if LANGUAGE == "fi" %}
+            "url":"//cdn.datatables.net/plug-ins/1.10.12/i18n/Finnish.json"
+            {% elif LANGUAGE == "sw" %}
+            "url":"//cdn.datatables.net/plug-ins/1.10.12/i18n/Swedish.json"
+            {% endif %}
+            }
+        } );
+    } );
+</script>
+
+{% endblock %}

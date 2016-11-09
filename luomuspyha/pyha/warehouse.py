@@ -16,12 +16,24 @@ def store(jsond):
 		if not checkJson(jsond):
 			return
 		x = json.loads(jsond, object_hook=lambda d: Namespace(**d))
-		if Request.requests.filter(id=os.path.basename(str(x.id))).exists():
+		if Request.requests.filter(lajiId=os.path.basename(str(x.id))).exists():
 			return
 		description = 'kuvaus'
-		order = Request.requests.filter(user=x.personId).count() + 1
 		status = getattr(x,'status', 0)
-		req = Request(os.path.basename(str(x.id)), description , order, status, datetime.now(), x.source, x.personId, x.approximateMatches, getattr(x,'downloadFormat','UNKNOWN'), getattr(x,'downloadIncludes','UNKNOWN'), makefiltersblob(x))
+		time = datetime.now()
+		
+		req = Request()
+		req.lajiId = os.path.basename(str(x.id))
+		req.description = description
+		req.status = status
+		req.sensstatus = 0
+		req.date = time
+		req.source = x.source
+		req.user = x.personId
+		req.approximateMatches = x.approximateMatches
+		req.downloadFormat = getattr(x,'downloadFormat','UNKNOWN')
+		req.downloadIncludes = getattr(x,'downloadIncludes','UNKNOWN')
+		req.filter_list = makeblob(x.filters)
 
 		req.save()
 
@@ -30,11 +42,11 @@ def store(jsond):
 		if hasattr(x, 'collections'):
                         for i in x.collections:
                         		makeCollection(req, i)
-		make_mail(x)
+		make_mail(x, time, req)
 
 def makeCollection(req, i):
 		co = Collection()
-		co.collection_id = os.path.basename(str(i.id))
+		co.address = os.path.basename(str(i.id))
 		co.description = 'kuvaus'
 		co.count = getattr(i, 'count', 0)
 		co.status = 0
@@ -42,23 +54,26 @@ def makeCollection(req, i):
 		secureReasons = getattr(i, 'mainSecureReasons', 0)
 		if(secureReasons != 0):
 			taxon = getattr(secureReasons, 'DEFAULT_TAXON_CONSERVATION', 0)
-			print(taxon)
 			custom = getattr(secureReasons, 'CUSTOM', 0)
 			if(taxon != 0):
 				co.taxonSecured = getattr(taxon, 'count', 0)
 			if(custom != 0):
 				co.customSecured = getattr(custom, 'count', 0)
+		if hasattr(i, 'mainSecureReasons'):
+			co.secureReasons = getattr(i, 'mainSecureReasons').__dict__
+			for key in co.secureReasons:
+				co.secureReasons[key]=0
+		else:
+			co.secureReasons = "{'none': 1}"
 		co.save()
 
-
-def make_mail(x):
-		subject = getattr(x, 'description', str (datetime.now()))
-		req_order = Request.requests.filter(user=x.personId).count()
-		req_link = settings.REQ_URL+str(req_order)
-		message_content = u"Aineistopyyntö odottaa kasittelyänne. Linkki aineistopyyntöönne "+subject+": "+req_link
+def make_mail(x, time, req):
+		subject = getattr(x, 'description', time.strftime('%d.%m.%Y %H:%I'))
+		req_link = settings.REQ_URL+str(req.id)
+		message_content = u"Olette tehneet pyynnön salattuun aineistoon Lajitietokeskuksessa "+time.strftime('%d.%m.%Y %H:%I')+u".\nPyyntö tarvitsee teiltä vielä ehtojen hyväksynnän.\nOsoite aineistopyyntöön "+subject+": "+req_link+ "\n\nYou have made a request to download secure FinBIF data on "+time.strftime('%d.%m.%Y %H:%I')+".\nYou are required to agree to the terms of use.\nAddress to your request "+subject+": "+req_link 
 		message = message_content
-		from_email = 'messanger@localhost.com'
-		recipients = ['x.email']
+		from_email = 'helpdesk@laji.fi'
+		recipients = [x.email]
 		mail = send_mail(subject, message, from_email, recipients, fail_silently=False)
 		return mail
 
@@ -68,19 +83,19 @@ def checkJson(jsond):
 			return True
 		return False
 		
-def makefiltersblob(x):
+def makeblob(x):
 		blob = "{"
-		for i, text in enumerate(x.filters):
+		for i, text in enumerate(x):
 			if not(i == 0):
 					blob += ","
-			blob += '"' + list(vars(x.filters[i]).keys())[0] + '":['
-			if isinstance(getattr(x.filters[i], list(vars(x.filters[i]).keys())[0]), (list)):
-				for l,text in enumerate(getattr(x.filters[i], list(vars(x.filters[i]).keys())[0])):
+			blob += '"' + list(vars(x[i]).keys())[0] + '":['
+			if isinstance(getattr(x[i], list(vars(x[i]).keys())[0]), (list)):
+				for l,text in enumerate(getattr(x[i], list(vars(x[i]).keys())[0])):
 					if not(l == 0):
 						blob += ","
 					blob += '"'+text+'"'
 			else:
-				blob += '"'+getattr(x.filters[i], list(vars(x.filters[i]).keys())[0])+'"'
+				blob += '"'+getattr(x[i], list(vars(x[i]).keys())[0])+'"'
 			blob += "]"
 		blob += "}"
 		return blob

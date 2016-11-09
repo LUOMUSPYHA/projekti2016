@@ -2,6 +2,7 @@ import unittest
 import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 
 class Change_description_TestCase(unittest.TestCase):
 	
@@ -24,18 +25,33 @@ class Change_description_TestCase(unittest.TestCase):
 		
 	def test_empty_description(self):
 		driver = self.driver
-		date = driver.find_element_by_xpath('//table[1]/tbody[1]/tr[1]/td[2]').text		
 		driver.get("http://127.0.0.1:8000/pyha/request/1")
+		language = driver.find_element_by_xpath('//*[@id="language_form"]/button[1]')
+		languagebutton = driver.find_element_by_xpath('//*[@id="navbar"]/ul[2]/div[1]').click()
+		finnish = driver.find_element_by_xpath('//*[@id="myDropdown"]/a[1]').click() 
+		try:
+			elem = driver.find_element_by_id("descriptionButton")
+			elem.click()
+		except NoSuchElementException:
+			pass
 		elem = driver.find_element_by_id("description-form")		
 		desc = driver.find_element_by_id("description")
 		desc.clear()
 		elem.submit()
 		header= driver.find_element_by_tag_name('h1')
-		self.assertEqual('Pyyntö:' + date, header.text) #korjaus odottaa lopullista muotoa
+		self.assertEqual('Pyyntö:', header.text)
 	
 	def test_changing_description(self):
 		driver = self.driver
 		driver.get("http://127.0.0.1:8000/pyha/request/1")
+		language = driver.find_element_by_xpath('//*[@id="language_form"]/button[1]')
+		languagebutton = driver.find_element_by_xpath('//*[@id="navbar"]/ul[2]/div[1]').click()
+		finnish = driver.find_element_by_xpath('//*[@id="myDropdown"]/a[1]').click() 
+		try:
+			elem = driver.find_element_by_id("descriptionButton")
+			elem.click()
+		except NoSuchElementException:
+			pass
 		elem = driver.find_element_by_id("description-form")		
 		desc = driver.find_element_by_id("description")
 		desc.clear()
@@ -43,6 +59,25 @@ class Change_description_TestCase(unittest.TestCase):
 		elem.submit()
 		header= driver.find_element_by_tag_name('h1')
 		self.assertEqual('Pyyntö: kokeiluotsikko', header.text)		
+
+	def test_too_long_description(self):
+		driver = self.driver
+		driver.get("http://127.0.0.1:8000/pyha/request/1")
+		try:
+			elem = driver.find_element_by_id("descriptionButton")
+			elem.click()
+		except NoSuchElementException:
+			pass
+		elem = driver.find_element_by_id("description-form")		
+		desc = driver.find_element_by_id("description")
+		desc.clear()
+		header = driver.find_element_by_tag_name('h1')
+		origLength = len(header.text)
+		tooLongDesc ="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		desc.send_keys(tooLongDesc)
+		elem.submit()
+		header = driver.find_element_by_tag_name('h1')
+		self.assertEqual(201, (len(header.text) - origLength))		
 	
 	def tearDown(self):
 		self.driver.close()
