@@ -1,6 +1,6 @@
 #coding=utf-8
 import requests
-from datetime import datetime
+from datetime import datetime, date, time
 from django.shortcuts import redirect
 from django.conf import settings
 from django.db import models
@@ -21,7 +21,7 @@ def store(jsond):
 		description = 'kuvaus'
 		status = getattr(x,'status', 0)
 		time = datetime.now()
-		
+
 		req = Request()
 		req.lajiId = os.path.basename(str(x.id))
 		req.description = description
@@ -51,6 +51,7 @@ def makeCollection(req, i):
 		co.count = getattr(i, 'count', 0)
 		co.status = 0
 		co.request = req
+		co.downloadRequestHandler = i.downloadRequestHandler
 		secureReasons = getattr(i, 'mainSecureReasons', 0)
 		if(secureReasons != 0):
 			taxon = getattr(secureReasons, 'DEFAULT_TAXON_CONSERVATION', 0)

@@ -17,6 +17,8 @@ from pyha.login import log_out
 from pyha.warehouse import store
 from pyha.models import Collection, Request
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from itertools import chain
+from itertools import groupby
 
 @csrf_exempt
 def index(request):
@@ -32,17 +34,24 @@ def index(request):
 		else:
 			title = "Välkommen"
 		hasRole = False
-		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
-                    hasRole = True
-                    
-		if secrets.ROLE_1 in request.session.get("user_role", [None]):
-                    request_list = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(secureReasons__icontains="taxon").values("request")).order_by('-date')
-                    context = {"role": hasRole, "email": request.session["user_email"], "title": title, "maintext": title  + "!", "requests": request_list, "static": settings.STA_URL }
-                    return render(request, 'pyha/role1/index.html', context)
+		if secrets.ROLE_1 in request.session.get("user_roles", [None]) or secrets.ROLE_2 in request.session.get("user_roles", [None]):
+			hasRole = True
+		if hasRole:
+			r1 = []
+			r2 = []
+			if secrets.ROLE_1 in request.session.get("user_role", [None]):
+				r1 = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(secureReasons__icontains="taxon").values("request")).order_by('-date')
+			if secrets.ROLE_2 in request.session.get("user_role", [None]):
+				r2 = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(secureReasons__icontains="CUSTOM",downloadRequestHandler__incontains = str(userId) ).values("request")).order_by('-date')
+			result_list = list(chain(r1, r2))
+			request_list = [rows.next() for (key, rows) in groupby(result_list, key=lambda obj: obj.id)] 
+			context = {"role": hasRole, "email": request.session["user_email"], "title": title, "maintext": title  + "!", "requests": request_list, "static": settings.STA_URL }
+			return render(request, 'pyha/role1/index.html', context)
+
 		else:
-                    request_list = Request.requests.filter(user=userId, status__gte=0).order_by('-date')
-                    context = {"role": hasRole, "email": request.session["user_email"], "title": title, "maintext": title  + "!", "requests": request_list, "static": settings.STA_URL }
-                    return render(request, 'pyha/index.html', context)
+				request_list = Request.requests.filter(user=userId, status__gte=0).order_by('-date')
+				context = {"role": hasRole, "email": request.session["user_email"], "title": title, "maintext": title  + "!", "requests": request_list, "static": settings.STA_URL }
+				return render(request, 'pyha/index.html', context)
 
 def login(request):
 		return _process_auth_response(request, '')
@@ -77,9 +86,9 @@ def _process_auth_response(request, indexpath):
 @csrf_exempt
 def receiver(request):
 		if 'JSON' in request.POST:
-                        text = request.POST['JSON']
-                        jsond = text
-                        store(jsond)
+			text = request.POST['JSON']
+			jsond = text
+			store(jsond)
 		else:
 			jsond = request.body.decode("utf-8")
 			store(jsond)
@@ -155,8 +164,19 @@ def show_filters(request):
 						filternamelist[k]= filtername
 			tup = (b, filternamelist, languagelabel)
 			filterResultList[i] = tup
-		print(filterResultList)
-		return filterResultList
+
+		hasRole = False
+		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
+						hasRole = True
+		context = {"taxon": taxon, "role": hasRole, "email": request.session["user_email"], "userRequest": userRequest, "filters": filterResultList, "collections": collectionList, "static": settings.STA_URL }
+					
+		if secrets.ROLE_1 in request.session.get("user_role", [None]):
+					return render(request, 'pyha/role1/requestview.html', context)
+		else:
+					if(userRequest.status == 0):
+						return render(request, 'pyha/requestform.html', context)
+					else:
+						return render(request, 'pyha/requestview.html', context)
 
 def change_description(request):
 	if request.method == 'POST':
@@ -217,7 +237,7 @@ def answer(request):
 			requestId = request.POST.get('requestid')
 			if "sens" not in collectionId:
 				collection = Collection.objects.get(request=requestId, address=collectionId)
-				if (int(request.POST.get('answer')) == 1):  
+				if (int(request.POST.get('answer')) == 1):	
 					collection.status = 4
 				else:
 					collection.status = 3
@@ -226,7 +246,7 @@ def answer(request):
 				update(requestId)
 			else:
 				userRequest = Request.requests.get(id = requestId)
-				if (int(request.POST.get('answer')) == 1):  
+				if (int(request.POST.get('answer')) == 1):	
 					userRequest.sensstatus = 4
 				else:
 					userRequest.sensstatus = 3
