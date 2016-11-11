@@ -23,7 +23,7 @@ html {
   }
   
   .container-fluid {
-    overflow-y: scroll;
+    overflow: hidden;
 }
 
   .dropbtn {

@@ -42,7 +42,9 @@
             data-href="request/{{request.id}}"
             >
             <td>{{request.description}}</td>
-            <td>{{request.date|date:"d.m.Y    H:m"}}</td>
+            
+            <td>{{request.date|date:"d.m.Y    H:i"}}</td>
+
             <td>{{ request.approximateMatches|intcomma|replaceCommaWithSpace }}</td>
             {% if request.status == 0 %}
                 <td>{% trans "Et ole hyväksynyt ehtoja" %}</td>
@@ -83,7 +85,7 @@
   </div>
 {% endblock %}
 
-{% block script %}
+{% block end_script %}
 <script>
 $(document).ready(function($) {
     $(".clickable-row").click(function() {

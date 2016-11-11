@@ -6,4 +6,7 @@ ROLE_1 = 'MA.sensitiveInformationApprovalRequestHandler'
 
 ROLES_1 = ['MA.sensitiveInformationApprovalRequestHandler', 'user']
 
+ROLE_2 = 'MA.downloadRequestHandler'
+
 PW_1 = 'tritritristore'
+

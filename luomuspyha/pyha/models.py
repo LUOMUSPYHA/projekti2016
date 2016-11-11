@@ -9,7 +9,7 @@ class Collection(models.Model):
 	request = models.ForeignKey('Request', on_delete=models.CASCADE)
 	taxonSecured = models.IntegerField(default=0)
 	customSecured = models.IntegerField(default=0)
-	secureReasons = models.CharField(max_length=500)
+	downloadRequestHandler = models.CharField(max_length=500,null=True)
 	decisionExplanation = models.CharField(max_length=1000,null=True)
 
 	def __str__(self):

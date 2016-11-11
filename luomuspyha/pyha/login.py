@@ -1,6 +1,8 @@
 ﻿import requests
 from django.shortcuts import redirect
 from django.conf import settings
+from pyha.models import Collection
+from luomuspyha import secrets
 import json
 
 def _get_authentication_info(request, token):
@@ -24,8 +26,9 @@ def log_in(request, content):
           request.session["user_roles"] = ['user']
           request.session["user_role"] = 'user'
        else:
-          request.session["user_role"] = content["user"]["roles"][0]
+          request.session["user_role"] = 'handler'
           request.session["user_roles"].append('user')
+       add_collection_owner(request, content)
        request.session.set_expiry(3600)
        return True
    return False
@@ -54,6 +57,7 @@ def authenticate(request, token):
    if result is None:
        return False
    else:
+       print(result)
        log_in(request, result)
        return True
 
@@ -70,3 +74,7 @@ def get_user_name(request):
    if "user_name" in request.session:
        return request.session["user_name"]
 
+def add_collection_owner(request, content):
+    if Collection.objects.filter(downloadRequestHandler__contains=request.session["user_id"]).count() > 0:
+      request.session["user_roles"].append(secrets.ROLE_2)
+      request.session["user_role"] = 'handler'
