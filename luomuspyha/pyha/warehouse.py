@@ -44,7 +44,6 @@ def store(jsond):
 def makeCollection(req, i):
 		co = Collection()
 		co.address = os.path.basename(str(i.id))
-		co.description = 'kuvaus'
 		co.count = getattr(i, 'count', 0)
 		co.status = 0
 		co.request = req
