@@ -22,13 +22,22 @@ def send_mail_after_receiving_request(requestId, lang):
 	time = req.date.strftime('%d.%m.%Y %H:%I')
 	req_link = settings.REQ_URL+str(req.id)
 	if(lang == 'fi'):
-		subject_content = u"Aineistopyyntö: " + req.description + time
+		if(req.description != ''):
+			subject_content = u"Aineistopyyntö: " + req.description
+		else:
+			subject_content = u"Aineistopyyntö: " + time
 		message = u"Olette tehneet pyynnön salattuun aineistoon Lajitietokeskuksessa "+time+".\nPyyntö tarvitsee teiltä vielä käyttöehtojen hyväksynnän.\n\nOsoite aineistopyyntöön: "+req_link
 	elif(lang == 'en'):
-		subject_content = u"Download request: " + req.description + time
+		if(req.description != ''):
+			subject_content = u"Download request: " + req.description
+		else:
+			subject_content = u"Download request: " + time
 		message = u"You have made a request to download secure FinBIF data on "+time+".\nYou are required to agree to the terms of use.\n\nAddress to your request: "+req_link 
 	else:
-		subject_content = u"På svenska: Aineistopyyntö: " + req.description + time
+		if(req.description != ''):
+			subject_content = u"På svenska: Aineistopyyntö: " + req.description
+		else:
+			subject_content = u"På svenska: Aineistopyyntö: " + time
 		content = u"På svenska: Olette tehneet pyynnön salattuun aineistoon Lajitietokeskuksessa "+time+".\nPyyntö tarvitsee teiltä vielä käyttöehtojen hyväksynnän.\n\nOsoite aineistopyyntöön: "+req_link
 	subject = subject_content	
 	from_email = 'helpdesk@laji.fi'	

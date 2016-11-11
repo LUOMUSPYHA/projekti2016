@@ -10,13 +10,14 @@ import unittest
 
 		
 class EmailTesting (TestCase):
-	def setUp(self):
-		#req = warehouse.store(JSON_MOCK4)
 
 	def test_mail_(self):
 		req = warehouse.store(JSON_MOCK4)
-		send_mail_after_receiving_request(req.id, fi)
+		
+		send_mail_after_receiving_request(req.id, "fi")
 		self.assertEqual(len(mail.outbox), 1)
 		msg = mail.outbox[0]
-		self.assertEqual(msg.subject, 'Testausta')
-		#self.assertItemsEqual(msg.recipients, ['te.staaja@example.com'])
+		self.assertEqual(msg.subject, 'Aineistopyyntö: Testausta')
+		
+
+
