@@ -18,13 +18,11 @@ def store(jsond):
 		x = json.loads(jsond, object_hook=lambda d: Namespace(**d))
 		if Request.requests.filter(lajiId=os.path.basename(str(x.id))).exists():
 			return
-		description = 'kuvaus'
 		status = getattr(x,'status', 0)
 		time = datetime.now()
 		
 		req = Request()
 		req.lajiId = os.path.basename(str(x.id))
-		req.description = description
 		req.status = status
 		req.sensstatus = 0
 		req.date = time
@@ -47,7 +45,6 @@ def store(jsond):
 def makeCollection(req, i):
 		co = Collection()
 		co.address = os.path.basename(str(i.id))
-		co.description = 'kuvaus'
 		co.count = getattr(i, 'count', 0)
 		co.status = 0
 		co.request = req
