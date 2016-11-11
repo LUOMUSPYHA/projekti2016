@@ -165,16 +165,16 @@ def remove_sensitive_data(request):
 	if request.method == 'POST':
 		next = request.POST.get('next', '/')
 		collectionId = request.POST.get('collectionId')
-		collection = Collection.collections.get(id = collectionId)
+		collection = Collection.objects.all().get(id = collectionId)
 		collection.taxonSecured = 0;
 		collection.save(update_fields=['taxonSecured'])
 		return HttpResponseRedirect(next)
 
-def remove_custom_secured_data(request):
+def remove_custom_data(request):
 	if request.method == 'POST':
 		next = request.POST.get('next', '/')
 		collectionId = request.POST.get('collectionId')
-		collection = Collection.collections.get(id = collectionId)
+		collection = Collection.objects.all().get(id = collectionId)
 		collection.customSecured = 0;
 		collection.save(update_fields=['customSecured'])
 		return HttpResponseRedirect(next)

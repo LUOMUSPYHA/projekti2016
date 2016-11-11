@@ -141,11 +141,11 @@
 								<td>{{collection.customSecured}}</td>
 							 	{% if collection.customSecured > 0 %}
 							 	<td>
-								<div class="custDeleteContainer">
-
-									<button type="submit" onclick="removeCustomButton" id="form{{ forloop.counter0 }}" type="button" ><span class="glyphicon glyphicon-trash"></span></button>
+								
+								<div class="customDeleteContainer">
+									<button class="removeCustomButton" id="form{{ forloop.counter0 }}" type="button" ><span class="glyphicon glyphicon-trash"></span></button>
 									{% trans "Poista aineistonhaltijan salaamat havainnot" %}
-								</div>
+								</div>	
 							</td>
 								{% else %}
 								<td></td>
@@ -153,12 +153,10 @@
 								<td>{{collection.taxonSecured}}</td>
 								{% if collection.taxonSecured > 0 %}
 							 	<td>
-	 							<form action="/pyha/removeSens" method="post">
-										<input type="hidden" id="collectionId" name="collectionId" value={{collection.id}}>
-										<input type="hidden" id="next" name="next" value={{request.path}}>
-										<input type="submit" id="sss"><span class="glyphicon glyphicon-trash"></span></input>
+								<div class="sensDeleteContainer">
+									<button class="removeSensitiveButton" id="form{{ forloop.counter0 }}" type="button" ><span class="glyphicon glyphicon-trash"></span></button>
 										{% trans "Poista sensitiiviset havainnot" %}
-								</form>
+								</div>
 								</td>
 								{% else %}
 								<td></td>
@@ -237,8 +235,31 @@
 			<input type="hidden" id="collectionid" name="collectionid" value={{collection.address}}>
 			<input type="hidden" id="next" name="next" value={{request.path}}>
 			<input type="submit" class="btn" value="submit!" name="psubmit" Style="display: none;"></button>
+		{% csrf_token %}
+		</div>
+	</form>
+	<!-- delete sensitive data -->
+	<form class="form-hidden" action="/pyha/removeSens" id="deletesensform{{ forloop.counter0 }}" method="post">
+		<div class="form-group">
+			<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
+			<input type="hidden" id="collectionId" name="collectionId" value={{collection.id}}>
+			<input type="hidden" id="next" name="next" value={{request.path}}>
+			<input type="submit" class="btn" value="submit!" name="psubmit" Style="display: none;"></button>
 		</div>
 		{% csrf_token %}
+
+	<!--  delete custom data -->
+	</form>
+		<form class="form-hidden" action="/pyha/removeCustom" id="deletecustomform{{ forloop.counter0 }}" method="post">
+		<div class="form-group">
+			<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
+			<input type="hidden" id="collectionId" name="collectionId" value={{collection.id}}>
+			<input type="hidden" id="next" name="next" value={{request.path}}>
+			<input type="submit" class="btn" value="submit!" name="psubmit" Style="display: none;"></button>
+
+		</div>
+		{% csrf_token %}
+
 	</form>
 	{% endfor %}
 	{% endif %}
@@ -296,7 +317,16 @@
 		$('.deleteContainer').click(function(e){
 			var name ="#delete" + $(this).find('.removeCollectionButton').attr('id');
 			$(name).submit();
-		})
+		});
+		$('.sensDeleteContainer').click(function(e){
+			var name = "#deletesens" + $(this).find('.removeSensitiveButton').attr('id');
+			$(name).submit();
+
+		});
+		$('.customDeleteContainer').click(function(e){
+			var name = "#deletecustom" + $(this).find('.removeCustomButton').attr('id');
+			$(name).submit();
+		});
 	</script>
 	
 	<script>
