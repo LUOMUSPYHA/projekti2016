@@ -17,7 +17,8 @@ class EmailTesting (TestCase):
 		send_mail_after_receiving_request(req.id, "fi")
 		self.assertEqual(len(mail.outbox), 1)
 		msg = mail.outbox[0]
-		self.assertEqual(msg.subject, 'Aineistopyynto: Testausta')
+		print(msg.subject)
+		self.assertEqual(msg.subject, 'Aineistopyyntö: Testausta')
 		
 
 
