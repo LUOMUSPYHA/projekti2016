@@ -217,6 +217,10 @@ def approve(request):
 					userRequest = Request.requests.get(id = requestId)
 					userRequest.sensstatus = 1
 					userRequest.save(update_fields=['sensstatus'])
+			for i in Collection.objects.filter(request = requestId):
+				if i.status == 0:
+					i.status = -1
+					i.save(update_fields=['status'])
 			userRequest = Request.requests.get(id = requestId)
 			userRequest.reason = request.POST.get('reason')
 			userRequest.status = 1
@@ -230,7 +234,7 @@ def answer(request):
 			requestId = request.POST.get('requestid')
 			if "sens" not in collectionId:
 				collection = Collection.objects.get(request=requestId, address=collectionId)
-				if (int(request.POST.get('answer')) == 1):	
+				if (int(request.POST.get('answer')) == 1):
 					collection.status = 4
 				else:
 					collection.status = 3
