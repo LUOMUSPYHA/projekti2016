@@ -18,16 +18,10 @@ def store(jsond):
 		data = json.loads(jsond, object_hook=lambda d: Namespace(**d))
 		if Request.requests.filter(lajiId=os.path.basename(str(data.id))).exists():
 			return
-
 		status = getattr(data,'status', 0)
 		time = datetime.now()
-		
 		req = Request()
 		req.lajiId = os.path.basename(str(data.id))
-		if hasattr(data, 'description'):
-			req.description = data.description
-		else:
-			req.description = ''
 		req.status = status
 		req.sensstatus = 0
 		req.date = time
@@ -48,7 +42,6 @@ def store(jsond):
 def makeCollection(req, i):
 		co = Collection()
 		co.address = os.path.basename(str(i.id))
-		co.description = 'kuvaus'
 		co.count = getattr(i, 'count', 0)
 		co.status = 0
 		co.request = req
@@ -69,9 +62,9 @@ def makeCollection(req, i):
 		co.save()
 
 def make_mail(x, time, req):
-		subject = getattr(x, 'description', time.strftime('%d.%m.%Y %H:%I'))
+		subject = getattr(x, 'description', time.strftime('%d.%m.%Y %H:%M'))
 		req_link = settings.REQ_URL+str(req.id)
-		message_content = u"Olette tehneet pyynnön salattuun aineistoon Lajitietokeskuksessa "+time.strftime('%d.%m.%Y %H:%I')+u".\nPyyntö tarvitsee teiltä vielä ehtojen hyväksynnän.\nOsoite aineistopyyntöön "+subject+": "+req_link+ "\n\nYou have made a request to download secure FinBIF data on "+time.strftime('%d.%m.%Y %H:%I')+".\nYou are required to agree to the terms of use.\nAddress to your request "+subject+": "+req_link 
+		message_content = u"Olette tehneet pyynnön salattuun aineistoon Lajitietokeskuksessa "+time.strftime('%d.%m.%Y %H:%M')+u".\nPyyntö tarvitsee teiltä vielä ehtojen hyväksynnän.\nOsoite aineistopyyntöön "+subject+": "+req_link+ "\n\nYou have made a request to download secure FinBIF data on "+time.strftime('%d.%m.%Y %H:%M')+".\nYou are required to agree to the terms of use.\nAddress to your request "+subject+": "+req_link 
 		message = message_content
 		from_email = 'helpdesk@laji.fi'
 		recipients = [x.email]
@@ -100,27 +93,3 @@ def makeblob(x):
 			blob += "]"
 		blob += "}"
 		return blob
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		

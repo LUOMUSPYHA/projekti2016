@@ -106,15 +106,14 @@ def show_request(request):
 				return HttpResponseRedirect('/pyha/')
 		userRequest = Request.requests.get(id=requestNum)
 		if secrets.ROLE_1 in request.session.get("user_role", [None]):
-			collectionList = Collection.objects.filter(request=userRequest.id, secureReasons__icontains="taxon", status__gte=0)
+			collectionList = Collection.objects.filter(request=userRequest.id, taxonSecured__gte=0, status__gte=0)
 		else:
 			collectionList = Collection.objects.filter(request=userRequest.id, status__gte=0)
 		for i, c in enumerate(collectionList):
 			c.result = requests.get(settings.LAJIAPI_URL+"collections/"+str(c)+"?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN).json()
-			c.reasons = ast.literal_eval(str(c.secureReasons))
 		taxon = False
 		for collection in collectionList:
-			if('DEFAULT_TAXON_CONSERVATION' in collection.reasons):
+			if(collection.taxonSecured > 0):
 				taxon = True
 		hasRole = False
 		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
@@ -175,6 +174,28 @@ def change_description(request):
 		userRequest.description = request.POST.get('description')
 		userRequest.save(update_fields=['description'])
 		return HttpResponseRedirect(next)
+
+def remove_sensitive_data(request):
+	if request.method == 'POST':
+		next = request.POST.get('next', '/')
+		collectionId = request.POST.get('collectionId')
+		collection = Collection.objects.all().get(id = collectionId)
+		collection.taxonSecured = 0;
+		collection.save(update_fields=['taxonSecured'])
+		return HttpResponseRedirect(next)
+
+def remove_custom_data(request):
+	if request.method == 'POST':
+		next = request.POST.get('next', '/')
+		collectionId = request.POST.get('collectionId')
+		collection = Collection.objects.all().get(id = collectionId)
+		collection.customSecured = 0;
+		collection.save(update_fields=['customSecured'])
+		return HttpResponseRedirect(next)
+
+
+
+
 
 def removeCollection(request):
 	if request.method == 'POST':
