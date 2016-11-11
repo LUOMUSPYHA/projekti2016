@@ -146,16 +146,21 @@ def show_filters(request):
 				if "RESOURCE" in getattr(filterfield, "type"):
 					resource = getattr(filterfield, "resource")
 					for k, a in enumerate(getattr(filterList, b)):
-						if(lang == 'sw'):
-							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=sv&access_token="+secrets.TOKEN)
+						if resource.startswith("metadata"):
+							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN)
+							filternameobject = json.loads(filterfield2.text, object_hook=lambda d: Namespace(**d))
+							#hakee labelin ok, mutta filternameobject json:sta ei osaa nyt hakea filternamea oikein
+							filtername = getattr(filternameobject, "value", str(a))
 						else:
-							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN)
+							if(lang == 'sw'):
+								filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=sv&access_token="+secrets.TOKEN)
+							else:
+								filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN)
 						filternameobject = json.loads(filterfield2.text, object_hook=lambda d: Namespace(**d))
 						filtername = getattr(filternameobject, "name", str(a))
 						filternamelist[k]= filtername
 			tup = (b, filternamelist, languagelabel)
 			filterResultList[i] = tup
-		print(filterResultList)
 		return filterResultList
 
 def change_description(request):
