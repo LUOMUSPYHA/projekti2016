@@ -18,8 +18,6 @@ from pyha.warehouse import store
 from pyha.models import Collection, Request
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
-from pyha.email import send_mail_after_receiving_request
-
 @csrf_exempt
 def index(request):
 		if not logged_in(request):
@@ -78,15 +76,13 @@ def _process_auth_response(request, indexpath):
 			return HttpResponseRedirect(settings.LAJIAUTH_URL+'login?target='+settings.TARGET+'&next='+str(indexpath))
 @csrf_exempt
 def receiver(request):
-		lang = request.LANGUAGE_CODE
 		if 'JSON' in request.POST:
                         text = request.POST['JSON']
                         jsond = text
-                        req = store(jsond)
+                        store(jsond)
 		else:
 			jsond = request.body.decode("utf-8")
-			req = store(jsond)
-		send_mail_after_receiving_request(req.id, lang)
+			store(jsond)
 		return HttpResponse('')
 
 
@@ -151,16 +147,19 @@ def show_filters(request):
 					for k, a in enumerate(getattr(filterList, b)):
 						if resource.startswith("metadata"):
 							filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN)
-							filternameobject = json.loads(filterfield2.text, object_hook=lambda d: Namespace(**d))
-							#hakee labelin ok, mutta filternameobject json:sta ei osaa nyt hakea filternamea oikein
-							filtername = getattr(filternameobject, "value", str(a))
+							kaannoslista = []
+							filtername = str(a)
+							for ii in filterfield2.json():
+								if (str(a) == ii['id']):
+									filtername = ii['value']
+									break
 						else:
 							if(lang == 'sw'):
 								filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=sv&access_token="+secrets.TOKEN)
 							else:
 								filterfield2 = requests.get(settings.LAJIAPI_URL+str(resource)+"/"+str(a)+"?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN)
-						filternameobject = json.loads(filterfield2.text, object_hook=lambda d: Namespace(**d))
-						filtername = getattr(filternameobject, "name", str(a))
+							filternameobject = json.loads(filterfield2.text, object_hook=lambda d: Namespace(**d))
+							filtername = getattr(filternameobject, "name", str(a))
 						filternamelist[k]= filtername
 			tup = (b, filternamelist, languagelabel)
 			filterResultList[i] = tup
