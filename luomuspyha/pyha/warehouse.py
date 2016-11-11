@@ -64,9 +64,9 @@ def makeCollection(req, i):
 		co.save()
 
 def make_mail(x, time, req):
-		subject = getattr(x, 'description', time.strftime('%d.%m.%Y %H:%I'))
+		subject = getattr(x, 'description', time.strftime('%d.%m.%Y %H:%M'))
 		req_link = settings.REQ_URL+str(req.id)
-		message_content = u"Olette tehneet pyynnön salattuun aineistoon Lajitietokeskuksessa "+time.strftime('%d.%m.%Y %H:%I')+u".\nPyyntö tarvitsee teiltä vielä ehtojen hyväksynnän.\nOsoite aineistopyyntöön "+subject+": "+req_link+ "\n\nYou have made a request to download secure FinBIF data on "+time.strftime('%d.%m.%Y %H:%I')+".\nYou are required to agree to the terms of use.\nAddress to your request "+subject+": "+req_link 
+		message_content = u"Olette tehneet pyynnön salattuun aineistoon Lajitietokeskuksessa "+time.strftime('%d.%m.%Y %H:%M')+u".\nPyyntö tarvitsee teiltä vielä ehtojen hyväksynnän.\nOsoite aineistopyyntöön "+subject+": "+req_link+ "\n\nYou have made a request to download secure FinBIF data on "+time.strftime('%d.%m.%Y %H:%M')+".\nYou are required to agree to the terms of use.\nAddress to your request "+subject+": "+req_link 
 		message = message_content
 		from_email = 'helpdesk@laji.fi'
 		recipients = [x.email]
