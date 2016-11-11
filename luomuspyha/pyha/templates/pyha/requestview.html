@@ -6,7 +6,7 @@
 		<div class="col-sm-9 col-lg-10">
 		  <div class="page-header"> 
 
-			<h1>{% trans "Pyyntö" %}:
+			<h1>{% trans "Pyyntö" %}: {{userRequest.date|date:"d.m.Y    H:m"}}
 				{% if userRequest.description and userRequest.description.strip %}
 					{{userRequest.description}}
 					<button class= "btn btn-default btn-xs" data-toggle="collapse" data-target="#descriptionEdit" id="descriptionButton"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -94,7 +94,7 @@
 							</tr>	
 							{% for filter in filters %}
 							<tr>	
-								<td rowspan={{filter.1|length}}>{{ filter.0 }}</td>
+								<td rowspan={{filter.1|length}}>{{ filter.2 }}</td>
 								{% for f in filter.1 %}
 								<td>{{ f }}</td>
 							</tr>
@@ -115,7 +115,7 @@
 						<h3>{% trans "Pyyntö sisältää sensitiivistä tietoa" %}:</h3>
 						<p>{% trans "Aineistot, jotka sisältävät sensitiivistä tietoa ovat merkattu kuvakkeella"%}. <span class="glyphicon glyphicon-eye-open" style="color:red;"></span></p> 
 						<button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModalsens">{% trans "Ehdot" %}</button>
-								<div class="modal fade" id="myModalsens"" tabindex="-1" role="dialog" aria-labelledby="sensiModalLabel">
+								<div class="modal fade" id="myModalsens" tabindex="-1" role="dialog" aria-labelledby="sensiModalLabel">
 								  <div class="modal-lg modal-dialog" role="document">
 									<div class="modal-content">
 									  <div class="modal-header">
@@ -142,7 +142,7 @@
 							<h3>{% trans "Päätös sensitiivisen tiedon antamisesta"%}</h3>
 							<table class="table" style="width:100%">
 								<tr style=color:black>
-								<th>{% trans "Status" %}</th>
+								<th>{% trans "Käsittelyn tila" %}</th>
 								<th>{% trans "Perustelut päätökselle" %}</th>
 								</tr>
 								{% if userRequest.sensstatus == 1 %}
@@ -179,11 +179,11 @@
 				
 						<table class="table" style="width:100%">
 							<tr style=color:black>
-								<th>{% trans "Nimi" %}</th>
+								<th>{% trans "Aineisto" %}</th>
 								<th>{% trans "Kuvaus" %}</th>
 								<th>{% trans "Aineistonhaltijan salaamat" %}</th>
 								<th>{% trans "Yleisesti salatut" %}</th>
-								<th>{% trans "Status" %}</th>
+								<th>{% trans "Käsittelyn tila" %}</th>
 								<th>{% trans "Ehdot" %}</th>
 								{% if userRequest.status != 1 %}
 								<th>{% trans "Syy" %}</th>

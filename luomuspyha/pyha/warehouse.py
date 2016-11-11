@@ -15,39 +15,34 @@ from random import randint
 def store(jsond):
 		if not checkJson(jsond):
 			return
-		x = json.loads(jsond, object_hook=lambda d: Namespace(**d))
-		if Request.requests.filter(lajiId=os.path.basename(str(x.id))).exists():
+		data = json.loads(jsond, object_hook=lambda d: Namespace(**d))
+		if Request.requests.filter(lajiId=os.path.basename(str(data.id))).exists():
 			return
-		description = 'kuvaus'
-		status = getattr(x,'status', 0)
+		status = getattr(data,'status', 0)
 		time = datetime.now()
-
+		
 		req = Request()
-		req.lajiId = os.path.basename(str(x.id))
-		req.description = description
+		req.lajiId = os.path.basename(str(data.id))
 		req.status = status
 		req.sensstatus = 0
 		req.date = time
-		req.source = x.source
-		req.user = x.personId
-		req.approximateMatches = x.approximateMatches
-		req.downloadFormat = getattr(x,'downloadFormat','UNKNOWN')
-		req.downloadIncludes = getattr(x,'downloadIncludes','UNKNOWN')
-		req.filter_list = makeblob(x.filters)
+		req.source = data.source
+		req.user = data.personId
+		req.approximateMatches = data.approximateMatches
+		req.downloadFormat = getattr(data,'downloadFormat','UNKNOWN')
+		req.downloadIncludes = getattr(data,'downloadIncludes','UNKNOWN')
+		req.filter_list = makeblob(data.filters)
 
 		req.save()
 
-
-
-		if hasattr(x, 'collections'):
-                        for i in x.collections:
+		if hasattr(data, 'collections'):
+                        for i in data.collections:
                         		makeCollection(req, i)
-		make_mail(x, time, req)
+		return req
 
 def makeCollection(req, i):
 		co = Collection()
 		co.address = os.path.basename(str(i.id))
-		co.description = 'kuvaus'
 		co.count = getattr(i, 'count', 0)
 		co.status = 0
 		co.request = req
@@ -69,9 +64,9 @@ def makeCollection(req, i):
 		co.save()
 
 def make_mail(x, time, req):
-		subject = getattr(x, 'description', time.strftime('%d.%m.%Y %H:%I'))
+		subject = getattr(x, 'description', time.strftime('%d.%m.%Y %H:%M'))
 		req_link = settings.REQ_URL+str(req.id)
-		message_content = u"Olette tehneet pyynnön salattuun aineistoon Lajitietokeskuksessa "+time.strftime('%d.%m.%Y %H:%I')+u".\nPyyntö tarvitsee teiltä vielä ehtojen hyväksynnän.\nOsoite aineistopyyntöön "+subject+": "+req_link+ "\n\nYou have made a request to download secure FinBIF data on "+time.strftime('%d.%m.%Y %H:%I')+".\nYou are required to agree to the terms of use.\nAddress to your request "+subject+": "+req_link 
+		message_content = u"Olette tehneet pyynnön salattuun aineistoon Lajitietokeskuksessa "+time.strftime('%d.%m.%Y %H:%M')+u".\nPyyntö tarvitsee teiltä vielä ehtojen hyväksynnän.\nOsoite aineistopyyntöön "+subject+": "+req_link+ "\n\nYou have made a request to download secure FinBIF data on "+time.strftime('%d.%m.%Y %H:%M')+".\nYou are required to agree to the terms of use.\nAddress to your request "+subject+": "+req_link 
 		message = message_content
 		from_email = 'helpdesk@laji.fi'
 		recipients = [x.email]
@@ -100,27 +95,3 @@ def makeblob(x):
 			blob += "]"
 		blob += "}"
 		return blob
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
