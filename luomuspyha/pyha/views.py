@@ -18,6 +18,8 @@ from pyha.warehouse import store
 from pyha.models import Collection, Request
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
+from pyha.email import send_mail_after_receiving_request
+
 @csrf_exempt
 def index(request):
 		if not logged_in(request):
@@ -76,13 +78,15 @@ def _process_auth_response(request, indexpath):
 			return HttpResponseRedirect(settings.LAJIAUTH_URL+'login?target='+settings.TARGET+'&next='+str(indexpath))
 @csrf_exempt
 def receiver(request):
+		lang = request.LANGUAGE_CODE
 		if 'JSON' in request.POST:
                         text = request.POST['JSON']
                         jsond = text
-                        store(jsond)
+                        req = store(jsond)
 		else:
 			jsond = request.body.decode("utf-8")
-			store(jsond)
+			req = store(jsond)
+		send_mail_after_receiving_request(req.id, lang)
 		return HttpResponse('')
 
 

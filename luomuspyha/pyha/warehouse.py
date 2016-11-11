@@ -18,7 +18,7 @@ def store(jsond):
 		x = json.loads(jsond, object_hook=lambda d: Namespace(**d))
 		if Request.requests.filter(lajiId=os.path.basename(str(x.id))).exists():
 			return
-		description = 'kuvaus'
+		description = ''
 		status = getattr(x,'status', 0)
 		time = datetime.now()
 		
@@ -37,12 +37,10 @@ def store(jsond):
 
 		req.save()
 
-
-
 		if hasattr(x, 'collections'):
                         for i in x.collections:
                         		makeCollection(req, i)
-		make_mail(x, time, req)
+		return req
 
 def makeCollection(req, i):
 		co = Collection()
