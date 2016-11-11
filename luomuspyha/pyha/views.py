@@ -14,6 +14,8 @@ from django.views.decorators.http import require_http_methods
 from django.conf import settings
 from pyha.login import authenticate
 from pyha.login import log_out
+from requests.auth import HTTPBasicAuth
+from pyha.email import fetch_email_address
 from pyha.warehouse import store
 from pyha.models import Collection, Request
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -118,7 +120,10 @@ def show_request(request):
 		hasRole = False
 		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
                         hasRole = True
-		context = {"taxon": taxon, "role": hasRole, "email": request.session["user_email"], "userRequest": userRequest, "filters": show_filters(request), "collections": collectionList, "static": settings.STA_URL }
+
+		request_owner = fetch_user_name(userRequest.user)
+		request_owners_email = fetch_email_address(userRequest.user)
+		context = {"taxon": taxon, "role": hasRole, "email": request.session["user_email"], "userRequest": userRequest, "filters": show_filters(request), "collections": collectionList, "static": settings.STA_URL, "request_owner": request_owner, "request_owners_email": request_owners_email}
                     
 		if secrets.ROLE_1 in request.session.get("user_role", [None]):
                     return render(request, 'pyha/role1/requestview.html', context)
@@ -182,6 +187,9 @@ def remove_sensitive_data(request):
 		collection = Collection.objects.all().get(id = collectionId)
 		collection.taxonSecured = 0;
 		collection.save(update_fields=['taxonSecured'])
+		if(collection.customSecured == 0):
+			collection.status = -1
+			collection.save(update_fields=['status'])
 		return HttpResponseRedirect(next)
 
 def remove_custom_data(request):
@@ -191,9 +199,27 @@ def remove_custom_data(request):
 		collection = Collection.objects.all().get(id = collectionId)
 		collection.customSecured = 0;
 		collection.save(update_fields=['customSecured'])
+		if(collection.taxonSecured == 0):
+			collection.status = -1
+			collection.save(update_fields=['status'])
 		return HttpResponseRedirect(next)
 
 
+def fetch_user_name(personId):
+	'''
+	fetches user name for a person registered in Laji.fi
+	:param personId: person identifier 
+	:returns: person's full name
+	'''
+	username = 'pyha'
+	password = settings.LAJIPERSONAPI_PW 
+	response = requests.get(settings.LAJIPERSONAPI_URL+personId+"?format=json", auth=HTTPBasicAuth(username, password ))
+	if(response.status_code == 200):
+		data = response.json()
+		name = data['rdf:RDF']['MA.person']['MA.fullName']
+		return name
+	else:
+		print('Nimen haku ei onnistunut. HTTP statuskoodi: ' + response.status_code)
 
 
 

@@ -6,15 +6,12 @@
 		<div class="col-sm-9 col-lg-10">
 		  <div class="page-header"> 
 
-			<h1>{% trans "Pyyntö" %}:
-				{% if userRequest.description and userRequest.description.strip %}
-					{{userRequest.description}}
-					<button class= "btn btn-default btn-xs" data-toggle="collapse" data-target="#descriptionEdit" id="descriptionButton"><span class="glyphicon glyphicon-pencil"></span></button>
-				{% else %}
-				{% endif %}
+			<h1>{% trans "Pyyntö käyttäjältä" %}
+				{{request_owner}},
+				{{request_owners_email}}
 			</h1>
 					
-				<h2>{{userRequest.date|date:"d.m.Y    H:m"}}</h2>
+				<h2>{{userRequest.date|date:"d.m.Y    H:i"}}</h2>
 			<h3><span style="white-space: nowrap;">(
 					<span
 					{% if userRequest.status == 1 %}
@@ -64,7 +61,7 @@
 							</tr>	
 							{% for filter in filters %}
 							<tr>	
-								<td rowspan={{filter.1|length}}>{{ filter.0 }}</td>
+								<td rowspan={{filter.1|length}}>{{ filter.2 }}</td>
 								{% for f in filter.1 %}
 								<td>{{ f }}</td>
 							</tr>
@@ -176,7 +173,7 @@
 								<tr	
 								{% endif %}
 								>
-								<td>{{collection.result.collectionName}}{% if 'DEFAULT_TAXON_CONSERVATION' in collection.reasons %} <span class="glyphicon glyphicon-eye-open" style="color:red;"></span> {% endif %}</td>
+								<td>{{collection.result.collectionName}}{% if collection.taxonSecured > 0 %} <span class="glyphicon glyphicon-eye-open" style="color:red;"></span> {% endif %}</td>
 								<td>{{collection.result.description}}</td>
 								
 								{% if collection.status == 1 %}
