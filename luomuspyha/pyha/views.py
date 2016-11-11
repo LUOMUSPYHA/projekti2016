@@ -36,7 +36,7 @@ def index(request):
 		hasRole = False
 		if secrets.ROLE_1 in request.session.get("user_roles", [None]) or secrets.ROLE_2 in request.session.get("user_roles", [None]):
 			hasRole = True
-		if 'handler' in request.session.get("user_role"):
+		if 'handler' in request.session.get("user_role", [None]):
 			r1 = []
 			r2 = []
 			if secrets.ROLE_1 in request.session.get("user_roles", [None]):
@@ -109,7 +109,7 @@ def show_request(request):
 			if not Request.requests.filter(id=requestNum, user=userId, status__gte=0).exists():
 				return HttpResponseRedirect('/pyha/')
 		userRequest = Request.requests.get(id=requestNum)
-		if not secrets.ROLE_1 in request.session.get("user_roles", [None]):
+		if secrets.ROLE_2 in request.session.get("user_roles", [None]):
 				if not Collection.objects.filter(request=userRequest.id, customSecured__gt = 0, downloadRequestHandler__contains = str(userId), status__gte=0).count() > 0:
 					return HttpResponseRedirect('/pyha/')
 		hasCollection = False;

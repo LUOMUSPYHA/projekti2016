@@ -43,8 +43,6 @@ def log_out(request):
        del request.session["user_id"]      
        del request.session["user_name"]
        del request.session["user_email"]
-       del request.session["user_roles"]
-       del request.session["user_role"]
        return True
    return False
 
