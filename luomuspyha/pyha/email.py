@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 from django.conf import settings
 from pyha.models import Collection, Request
 from datetime import datetime
-from django.core.mail import EmailMessage
-from email.header import Header
 import time
 from django.core.mail import send_mail
 import requests
