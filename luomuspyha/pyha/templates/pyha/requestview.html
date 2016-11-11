@@ -142,7 +142,7 @@
 							<h3>{% trans "Päätös sensitiivisen tiedon antamisesta"%}</h3>
 							<table class="table" style="width:100%">
 								<tr style=color:black>
-								<th>{% trans "Status" %}</th>
+								<th>{% trans "Käsittelyn tila" %}</th>
 								<th>{% trans "Perustelut päätökselle" %}</th>
 								</tr>
 								{% if userRequest.sensstatus == 1 %}
@@ -179,11 +179,11 @@
 				
 						<table class="table" style="width:100%">
 							<tr style=color:black>
-								<th>{% trans "Nimi" %}</th>
+								<th>{% trans "Aineisto" %}</th>
 								<th>{% trans "Kuvaus" %}</th>
 								<th>{% trans "Aineistonhaltijan salaamat" %}</th>
 								<th>{% trans "Yleisesti salatut" %}</th>
-								<th>{% trans "Status" %}</th>
+								<th>{% trans "Käsittelyn tila" %}</th>
 								<th>{% trans "Ehdot" %}</th>
 								{% if userRequest.status != 1 %}
 								<th>{% trans "Syy" %}</th>
