@@ -15,31 +15,29 @@ from random import randint
 def store(jsond):
 		if not checkJson(jsond):
 			return
-		x = json.loads(jsond, object_hook=lambda d: Namespace(**d))
-		if Request.requests.filter(lajiId=os.path.basename(str(x.id))).exists():
+		data = json.loads(jsond, object_hook=lambda d: Namespace(**d))
+		if Request.requests.filter(lajiId=os.path.basename(str(data.id))).exists():
 			return
-		status = getattr(x,'status', 0)
+		status = getattr(data,'status', 0)
 		time = datetime.now()
 		req = Request()
-		req.lajiId = os.path.basename(str(x.id))
+		req.lajiId = os.path.basename(str(data.id))
 		req.status = status
 		req.sensstatus = 0
 		req.date = time
-		req.source = x.source
-		req.user = x.personId
-		req.approximateMatches = x.approximateMatches
-		req.downloadFormat = getattr(x,'downloadFormat','UNKNOWN')
-		req.downloadIncludes = getattr(x,'downloadIncludes','UNKNOWN')
-		req.filter_list = makeblob(x.filters)
+		req.source = data.source
+		req.user = data.personId
+		req.approximateMatches = data.approximateMatches
+		req.downloadFormat = getattr(data,'downloadFormat','UNKNOWN')
+		req.downloadIncludes = getattr(data,'downloadIncludes','UNKNOWN')
+		req.filter_list = makeblob(data.filters)
 
 		req.save()
 
-
-
-		if hasattr(x, 'collections'):
-                        for i in x.collections:
+		if hasattr(data, 'collections'):
+                        for i in data.collections:
                         		makeCollection(req, i)
-		make_mail(x, time, req)
+		return req
 
 def makeCollection(req, i):
 		co = Collection()
@@ -95,27 +93,3 @@ def makeblob(x):
 			blob += "]"
 		blob += "}"
 		return blob
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
