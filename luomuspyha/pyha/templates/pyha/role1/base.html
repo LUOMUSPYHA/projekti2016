@@ -93,11 +93,10 @@
 		<form id='role_form' action="{% url 'pyha:change_role' %}" method="post"
             data-currenturl='{{ request.path }}'
             data-currentfullurl='{{ request.get_full_path }}'>
-		<button type="button" onclick="roleFunction()" class="dropbtn">{{request.session.user_role}}{% csrf_token %}<span class="glyphicon glyphicon-eye-open"></span></button>
+		<button type="button" onclick="roleFunction()" class="dropbtn">{% trans request.session.user_role %}{% csrf_token %}<span class="glyphicon glyphicon-eye-open"></span></button>
 			<div id="roleDropdown" class="dropdown-content">			
-              {% for role in request.session.user_roles %}
-              <a onclick='roleSubmit("{{ role }}")' name="role" id="role">{{ role }}</a>
-              {% endfor %}
+              <a onclick='roleSubmit("user")' name="role" id="role">{% trans "Käyttäjä" %}</a>
+              <a onclick='roleSubmit("handler")' name="role" id="role">{% trans "Pyynnönkäsittelijä" %}</a>
 			  
 			</div>
 		</div>

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 {% load i18n %}
 {% load static %}
+{% block start_script %}
+{% endblock %}
 
 <html lang="fi"><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -62,9 +64,8 @@
             data-currentfullurl='{{ request.get_full_path }}'>
 		<button type="button" onclick="roleFunction()" class="dropbtn">{{request.session.user_role}}{% csrf_token %}<span class="glyphicon glyphicon-eye-open"></span></button>
 			<div id="roleDropdown" class="dropdown-content">			
-              {% for role in request.session.user_roles %}
-              <a onclick='roleSubmit("{{ role }}")' name="role" id="role">{{ role }}</a>
-              {% endfor %}
+              <a onclick='roleSubmit("user")' name="role" id="role">{% trans "Käyttäjä" %}</a>
+              <a onclick='roleSubmit("handler")' name="role" id="role">{% trans "Pyynnönkäsittelijä" %}</a>
 			  
 			</div>
 		</div>
@@ -159,8 +160,9 @@
 		}
   </script>
 
-{% block script %}
-{% endblock %}
+
 
 </body>
 </html>
+{% block end_script %}
+{% endblock %}

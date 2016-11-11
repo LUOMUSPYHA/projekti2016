@@ -123,12 +123,12 @@
 							</tr>	
 							{% for collection in collections %}
 							<tr style="border-bottom:2px solid #456789">
-								<td>{{collection.result.collectionName}}{% if 'DEFAULT_TAXON_CONSERVATION' in collection.reasons %} <span class="glyphicon glyphicon-eye-open" style="color:red;"></span> {% endif %}</td>
+								<td>{{collection.result.collectionName}}{% if collection.taxonSecured > 0 %} <span class="glyphicon glyphicon-eye-open" style="color:red;"></span> {% endif %}</td>
 								<td>{{collection.result.description}}</td>
 								<td>{{collection.customSecured}}</td>
 								<td>{{collection.taxonSecured}}</td>
 
-								{% if 'CUSTOM' in collection.reasons %}
+								{% if collection.customSecured > 0 %}
 								<td><button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModal{{ forloop.counter0 }}">{% trans "Ehdot" %}</button></td>
 								<td><span id ="statustext{{ forloop.counter0 }}">{% trans "Et ole hyväksynyt ehtoja" %}</span></td>
 								<td>
@@ -208,7 +208,7 @@
 	{% endif %}
 {% endblock %}
 
-{% block script %}
+{% block start_script %}
 
 	<script>
 	  var accepted = [];
@@ -254,12 +254,6 @@
 	  }
 	</script>
 	
-	<script>
-		$('.deleteContainer').click(function(e){
-			var name ="#delete" + $(this).find('.removeCollectionButton').attr('id');
-			$(name).submit();
-		})
-	</script>
 	
 	<script>
 	$(document).ready(function(){
@@ -301,6 +295,13 @@
 	
 	</script>
 {% endblock %}
-
+{% block end_script %}
+	<script>
+		$('.deleteContainer').click(function(e){
+			var name ="#delete" + $(this).find('.removeCollectionButton').attr('id');
+			$(name).submit();
+		})
+	</script>
+{% endblock %}
 {% block modal %}
 {% endblock %}

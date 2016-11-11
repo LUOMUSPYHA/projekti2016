@@ -51,7 +51,7 @@ def makeCollection(req, i):
 		co.count = getattr(i, 'count', 0)
 		co.status = 0
 		co.request = req
-		co.downloadRequestHandler = i.downloadRequestHandler
+		co.downloadRequestHandler = getattr(i, 'downloadRequestHandler', 'none')
 		secureReasons = getattr(i, 'mainSecureReasons', 0)
 		if(secureReasons != 0):
 			taxon = getattr(secureReasons, 'DEFAULT_TAXON_CONSERVATION', 0)

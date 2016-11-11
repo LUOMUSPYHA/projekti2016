@@ -36,15 +36,14 @@ def index(request):
 		hasRole = False
 		if secrets.ROLE_1 in request.session.get("user_roles", [None]) or secrets.ROLE_2 in request.session.get("user_roles", [None]):
 			hasRole = True
-		if hasRole:
+		if 'handler' in request.session.get("user_role"):
 			r1 = []
 			r2 = []
-			if secrets.ROLE_1 in request.session.get("user_role", [None]):
-				r1 = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(secureReasons__icontains="taxon").values("request")).order_by('-date')
-			if secrets.ROLE_2 in request.session.get("user_role", [None]):
-				r2 = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(secureReasons__icontains="CUSTOM",downloadRequestHandler__incontains = str(userId) ).values("request")).order_by('-date')
-			result_list = list(chain(r1, r2))
-			request_list = [rows.next() for (key, rows) in groupby(result_list, key=lambda obj: obj.id)] 
+			if secrets.ROLE_1 in request.session.get("user_roles", [None]):
+				r1 = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(taxonSecured__gt = 0).values("request")).order_by('-date')
+			if secrets.ROLE_2 in request.session.get("user_roles", [None]):
+				r2 = Request.requests.exclude(status__lte=0).filter(id__in=Collection.objects.filter(customSecured__gt = 0,downloadRequestHandler__contains = str(userId) ).values("request")).order_by('-date')
+			request_list = list(chain(r1, r2))
 			context = {"role": hasRole, "email": request.session["user_email"], "title": title, "maintext": title  + "!", "requests": request_list, "static": settings.STA_URL }
 			return render(request, 'pyha/role1/index.html', context)
 
@@ -103,30 +102,37 @@ def show_request(request):
 		if not logged_in(request):
 			return _process_auth_response(request, "request/"+requestNum)
 		userId = request.session["user_id"]
-		if secrets.ROLE_1 in request.session.get("user_role", [None]):
+		if 'handler' in request.session.get("user_role", [None]):			
 			if not Request.requests.filter(id=requestNum, status__gte=0).exists():
 				return HttpResponseRedirect('/pyha/')
 		else:
 			if not Request.requests.filter(id=requestNum, user=userId, status__gte=0).exists():
 				return HttpResponseRedirect('/pyha/')
 		userRequest = Request.requests.get(id=requestNum)
-		if secrets.ROLE_1 in request.session.get("user_role", [None]):
-			collectionList = Collection.objects.filter(request=userRequest.id, secureReasons__icontains="taxon", status__gte=0)
-		else:
+		if not secrets.ROLE_1 in request.session.get("user_roles", [None]):
+				if not Collection.objects.filter(request=userRequest.id, customSecured__gt = 0, downloadRequestHandler__contains = str(userId), status__gte=0).count() > 0:
+					return HttpResponseRedirect('/pyha/')
+		hasCollection = False;
+		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
+			collectionList = Collection.objects.filter(request=userRequest.id, taxonSecured__gt = 0, status__gte=0)
+			hasCollection = True;
+		if secrets.ROLE_2 in request.session.get("user_roles", [None]):
+			collectionList = Collection.objects.filter(request=userRequest.id, customSecured__gt = 0, downloadRequestHandler__contains = str(userId), status__gte=0)
+			hasCollection = True;
+		if not hasCollection:
 			collectionList = Collection.objects.filter(request=userRequest.id, status__gte=0)
 		for i, c in enumerate(collectionList):
-			c.result = requests.get(settings.LAJIAPI_URL+"collections/"+str(c)+"?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN).json()
-			c.reasons = ast.literal_eval(str(c.secureReasons))
+			c.result = requests.get(settings.LAJIAPI_URL+"collections/"+str(c)+"?lang=" + request.LANGUAGE_CODE + "&access_token="+secrets.TOKEN).json()			
 		taxon = False
 		for collection in collectionList:
-			if('DEFAULT_TAXON_CONSERVATION' in collection.reasons):
+			if(collection.taxonSecured > 0):
 				taxon = True
 		hasRole = False
-		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
+		if secrets.ROLE_1 in request.session.get("user_roles", [None]) or secrets.ROLE_2 in request.session.get("user_roles", [None]):
                         hasRole = True
 		context = {"taxon": taxon, "role": hasRole, "email": request.session["user_email"], "userRequest": userRequest, "filters": show_filters(request), "collections": collectionList, "static": settings.STA_URL }
                     
-		if secrets.ROLE_1 in request.session.get("user_role", [None]):
+		if 'handler' in request.session.get("user_role", [None]):
                     return render(request, 'pyha/role1/requestview.html', context)
 		else:
                     if(userRequest.status == 0):
@@ -164,19 +170,6 @@ def show_filters(request):
 						filternamelist[k]= filtername
 			tup = (b, filternamelist, languagelabel)
 			filterResultList[i] = tup
-
-		hasRole = False
-		if secrets.ROLE_1 in request.session.get("user_roles", [None]):
-						hasRole = True
-		context = {"taxon": taxon, "role": hasRole, "email": request.session["user_email"], "userRequest": userRequest, "filters": filterResultList, "collections": collectionList, "static": settings.STA_URL }
-					
-		if secrets.ROLE_1 in request.session.get("user_role", [None]):
-					return render(request, 'pyha/role1/requestview.html', context)
-		else:
-					if(userRequest.status == 0):
-						return render(request, 'pyha/requestform.html', context)
-					else:
-						return render(request, 'pyha/requestview.html', context)
 
 def change_description(request):
 	if request.method == 'POST':
