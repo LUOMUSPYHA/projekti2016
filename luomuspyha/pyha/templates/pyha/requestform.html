@@ -4,12 +4,11 @@
 	  <div class="container-fluid">
 		<div class="col-sm-9 col-lg-10">
 			<div class="page-header">
-				<h1>{% trans "Pyyntö" %}: 
+				<h1>{% trans "Pyyntö" %}: {{userRequest.date|date:"d.m.Y    h:i"}}
 					{% if userRequest.description and userRequest.description.strip %} 
 						{{userRequest.description}}
 						<button class= "btn btn-default btn-xs" data-toggle="collapse" data-target="#descriptionEdit" id="descriptionButton"><span class="glyphicon glyphicon-pencil"></span></button>
 					{% else %}
-					{{userRequest.date|date:"d.m.Y    H:i"}} 
 					{% endif %}
 				</h1>
 				
@@ -23,7 +22,11 @@
 							</div>
 							
 							<div class="col-12" style="clear: left;">
-								<textarea class="form-control" name = "description" id="description" rows="2" maxlength="200" style="width:50%;min-width:300px" >{{userRequest.description}}</textarea>
+								{% if userRequest.description and userRequest.description.strip %}
+									<textarea class="form-control" name = "description" id="description" rows="2" maxlength="200" style="width:50%;min-width:300px" >{{userRequest.description}}</textarea>
+								{% else %} 
+									<textarea class="form-control" name = "description" id="description" rows="2" maxlength="200" style="width:50%;min-width:300px" >Ei kuvausta</textarea>
+								{% endif %}
 								<!--<input type="text" class="form-control" id="description" name="description" 
 										value={{userRequest.description}} style="width: 300px;height: 50px"> -->
 								<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
@@ -42,7 +45,6 @@
 						{% csrf_token %}
 					</form>
 				</div>
-					
 			</div>
 				<!-- suodatinlista -->
 

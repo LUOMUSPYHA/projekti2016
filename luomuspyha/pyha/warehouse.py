@@ -20,7 +20,6 @@ def store(jsond):
 			return
 		status = getattr(x,'status', 0)
 		time = datetime.now()
-		
 		req = Request()
 		req.lajiId = os.path.basename(str(x.id))
 		req.status = status
