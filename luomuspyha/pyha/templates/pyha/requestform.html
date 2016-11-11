@@ -4,7 +4,7 @@
 	  <div class="container-fluid">
 		<div class="col-sm-9 col-lg-10">
 			<div class="page-header">
-				<h1>{% trans "Pyyntö" %}: {{userRequest.date|date:"d.m.Y    h:i"}}
+				<h1>{% trans "Pyyntö" %}: {{userRequest.date|date:"d.m.Y    H:m"}}
 					{% if userRequest.description and userRequest.description.strip %} 
 						{{userRequest.description}}
 						<button class= "btn btn-default btn-xs" data-toggle="collapse" data-target="#descriptionEdit" id="descriptionButton"><span class="glyphicon glyphicon-pencil"></span></button>
