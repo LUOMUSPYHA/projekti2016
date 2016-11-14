@@ -46,7 +46,7 @@ class EmailTesting (TestCase):
 	def test_send_mail_after_request_status_change_to_requester(self):
 		req = warehouse.store(JSON_MOCK4)
 		req.save()
-		send_mail_after_request_status_change_to_requester(req.id, None, "fi")
+		send_mail_after_request_status_change_to_requester(req.id, "fi")
 		self.assertEqual(len(mail.outbox), 1)
 		msg = mail.outbox[0]
 		self.assertEqual(msg.subject, 'Aineistopyyntösi tila Lajitietokeskuksessa on muuttunut')

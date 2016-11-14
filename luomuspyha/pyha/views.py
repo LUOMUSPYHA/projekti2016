@@ -365,7 +365,7 @@ def update(requestId, lang):
 		
 		#Send email if status changed
 		if(statusBeforeUpdate!=wantedRequest.status):
-			send_mail_after_request_status_change_to_requester(wantedRequest.id, None, lang)
+			send_mail_after_request_status_change_to_requester(wantedRequest.id, lang)
 			
 
 

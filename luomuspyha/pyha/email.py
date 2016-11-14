@@ -92,14 +92,13 @@ def send_mail_for_approval(requestId, collection, lang):
 				recipients.append(email)
 	mail = send_mail(subject, message, from_email, recipients, fail_silently=False)
 
-def send_mail_after_request_status_change_to_requester(requestId,collections, lang):
+def send_mail_after_request_status_change_to_requester(requestId, lang):
 	'''
 	Sends mail to person who made the request when request status changes
 	:param requestId: request identifier 
 	:param collections: list of collection addresses
 	:param lang: language code
 	'''	
-	#TODO: add information on which collection(s) changed
 	req = Request.requests.get(id = requestId)
 	time = req.date.strftime('%d.%m.%Y %H:%M')
 	req_link = settings.REQ_URL+str(req.id)
