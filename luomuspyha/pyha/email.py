@@ -17,7 +17,7 @@ def send_mail_after_receiving_request(requestId, lang):
 	:param lang: language code
 	'''	
 	req = Request.requests.get(id=requestId)	
-	time = req.date.strftime('%d.%m.%Y %H:%I')
+	time = req.date.strftime('%d.%m.%Y %H:%M')
 	req_link = settings.REQ_URL+str(req.id)
 	if(lang == 'fi'):
 		if(req.description != ''):
