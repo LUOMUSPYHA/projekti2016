@@ -22,7 +22,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from itertools import chain
 from itertools import groupby
 
-from pyha.email import send_mail_after_receiving_request
+from pyha.email import *
 
 @csrf_exempt
 def index(request):
@@ -96,7 +96,7 @@ def receiver(request):
 		else:
 			jsond = request.body.decode("utf-8")
 			req = store(jsond)
-		send_mail_after_receiving_request(req.id, lang)
+		send_mail_after_receiving_request(req.id, lang)	
 		return HttpResponse('')
 
 
@@ -267,10 +267,12 @@ def removeCollection(request):
 
 def approve(request):
 	if request.method == 'POST':
+		lang = request.LANGUAGE_CODE
 		requestId = request.POST.get('requestid')
 		requestedCollections = request.POST.getlist('checkb');
 		if(len(requestedCollections) > 0):
 			for i in requestedCollections:
+				send_mail_for_approval(requestId, i, lang)
 				if i not in "sens":
 					userCollection = Collection.objects.get(address = i, request = requestId)
 					userCollection.status = 1
@@ -311,11 +313,20 @@ def answer(request):
 					userRequest.sensstatus = 3
 				userRequest.sensDecisionExplanation = request.POST.get('reason')
 				userRequest.save()
-				update(requestId)
+				update(requestId, request.LANGUAGE_CODE)
 		return HttpResponseRedirect(next)
 
-def update(requestId):
+def update(requestId, lang):
+		#for both sensstatus and collection status
+		#status 0: Ei sensitiivistä tietoa
+		#status 1: Odottaa aineiston toimittajan käsittelyä
+		#status 2: Osittain hyväksytty
+		#status 3: Hylätty
+		#status 4: Hyväksytty
+		
 		wantedRequest = Request.requests.get(id=requestId)
+		#tmp variable for checking if status changed
+		statusBeforeUpdate = wantedRequest.status
 		requestCollections = Collection.objects.filter(request=requestId)
 		accepted = 0
 		declined = 0
@@ -350,5 +361,22 @@ def update(requestId):
 			wantedRequest.status = 4
 		else:
 			wantedRequest.status = 5
-
 		wantedRequest.save()
+		
+		#Send email if status changed
+		if(statusBeforeUpdate!=wantedRequest.status):
+			send_mail_after_request_status_change_to_requester(wantedRequest.id, None, lang)
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
