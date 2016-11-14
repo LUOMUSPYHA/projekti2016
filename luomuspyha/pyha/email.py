@@ -1,6 +1,7 @@
 #coding=utf-8
 from __future__ import unicode_literals
 from django.conf import settings
+from luomuspyha import secrets
 from pyha.models import Collection, Request
 from datetime import datetime
 import time
@@ -59,4 +60,34 @@ def fetch_email_address(personId):
 	else:
 		print('Sähköpostiosoitteen haku ei onnistunut. HTTP statuskoodi: ' + response.status_code)
 		
-
+def send_mail_for_approval(requestId, collection, lang):
+	'''
+	Sends mail to collection owner(s) for request approval
+	:param requestId: request identifier 
+	:param collection: collection address
+	:param lang: language code
+	'''	
+	req = Request.requests.get(id = requestId)
+	time = req.date.strftime('%d.%m.%Y %H:%M')
+	req_link = settings.REQ_URL+str(req.id)	
+	if(lang == 'fi'):
+		subject = "Aineistopyyntö Lajitietokeskuksesta odottaa hyväksymispäätöstänne"
+		message = "Lajitietokeskuksesta "+time+" lähetetty aineistopyyntö odottaa päätöstänne käytön hyväksymisestä.\n\nOsoite aineistopyyntöön: "+req_link
+	elif(lang == 'en'):
+		subject = u"Download request from FinBIF waits for approval decision"
+		message = u"Download request sent from Finnish Biodiversity Info Faculty at "+time+" waits for your approval decision.\n\nAddress to the request: "+req_link
+	else:
+		subject = u"På svenska: Aineistopyyntö Lajitietokeskuksesta odottaa hyväksymispäätöstänne"
+		message = u"På svenska: Lajitietokeskuksesta "+time+" lähetetty aineistopyyntö odottaa päätöstänne käytön hyväksymisestä.\n\nOsoite aineistopyyntöön: "+req_link	
+	from_email = 'helpdesk@laji.fi'
+	recipients = []
+	response = requests.get(settings.LAJIAPI_URL+"collections/"+str(collection)+"?access_token="+secrets.TOKEN)
+	if(response.status_code == 200):
+		data = response.json()
+		if 'downloadRequestHandler' in data:
+			handlers = data['downloadRequestHandler']
+			for personId in handlers:
+				email = fetch_email_address(personId)
+				print(email)
+				recipients.append(email)
+	mail = send_mail(subject, message, from_email, recipients, fail_silently=False)

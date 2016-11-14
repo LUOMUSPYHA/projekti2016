@@ -23,6 +23,7 @@ from itertools import chain
 from itertools import groupby
 
 from pyha.email import send_mail_after_receiving_request
+from pyha.email import send_mail_for_approval
 
 @csrf_exempt
 def index(request):
@@ -96,7 +97,7 @@ def receiver(request):
 		else:
 			jsond = request.body.decode("utf-8")
 			req = store(jsond)
-		send_mail_after_receiving_request(req.id, lang)
+		send_mail_after_receiving_request(req.id, lang)	
 		return HttpResponse('')
 
 
@@ -267,10 +268,12 @@ def removeCollection(request):
 
 def approve(request):
 	if request.method == 'POST':
+		lang = request.LANGUAGE_CODE
 		requestId = request.POST.get('requestid')
 		requestedCollections = request.POST.getlist('checkb');
 		if(len(requestedCollections) > 0):
 			for i in requestedCollections:
+				send_mail_for_approval(requestId, i, lang)
 				if i not in "sens":
 					userCollection = Collection.objects.get(address = i, request = requestId)
 					userCollection.status = 1
