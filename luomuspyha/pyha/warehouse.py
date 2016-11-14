@@ -21,6 +21,7 @@ def store(jsond):
 		time = datetime.now()
 		
 		req = Request()
+		req.description=''
 		req.lajiId = os.path.basename(str(data.id))
 		req.status = status
 		req.sensstatus = 0

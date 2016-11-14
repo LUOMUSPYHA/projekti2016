@@ -304,7 +304,7 @@ def answer(request):
 					collection.status = 3
 				collection.decisionExplanation = request.POST.get('reason')
 				collection.save()
-				update(requestId)
+				update(requestId, request.LANGUAGE_CODE)
 			else:
 				userRequest = Request.requests.get(id = requestId)
 				if (int(request.POST.get('answer')) == 1):	
