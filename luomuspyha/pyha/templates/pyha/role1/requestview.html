@@ -142,7 +142,7 @@
 										<input type="hidden" id="collectionid" name="collectionid" value="sens">
 										<input type="hidden" id="next" name="next" value={{request.path}}>
 										<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
-										<textarea class="form-control" rows="5" cols="700" id="reason" name="reason" required >{{userRequest.sensDecisionExplanation}}</textarea>
+										<textarea class="form-control" rows="5" cols="700" id="reason" name="reason" required >{% if userRequest.sensDecisionExplanation %}{{userRequest.sensDecisionExplanation}}{% else %}{% endif %}</textarea>
 										<button type="submit" id="submit" name="answer" value=1 class="btn btn-default btn-sm">{% trans "Hyväksy" %}</button>
 										<button type="submit" id="submit" name="answer" value=0 class="btn btn-default btn-sm">{% trans "Hylkää" %}</button>
 									</div>
@@ -195,7 +195,7 @@
 										<input type="hidden" id="collectionid" name="collectionid" value={{collection.address}}>
 										<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
 										<input type="hidden" id="next" name="next" value={{request.path}}>
-										<textarea class="form-control" rows="5" cols="700" id="reason" name="reason" required >{{collection.decisionExplanation}}</textarea>
+										<textarea class="form-control" rows="5" cols="700" id="reason" name="reason" required >{% if collection.decisionExplanation %}{{collection.decisionExplanation}}{% else %}{% endif %}</textarea>
 										<button type="submit" id="submit" name="answer" value=1 class="btn btn-default btn-sm">{% trans "Hyväksy" %}</button>
 										<button type="submit" id="submit" name="answer" value=0 class="btn btn-default btn-sm">{% trans "Hylkää" %}</button>
 									</div>
