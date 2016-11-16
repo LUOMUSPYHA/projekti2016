@@ -115,6 +115,8 @@ def show_request(request):
 			if not Request.requests.filter(id=requestNum, user=userId, status__gte=0).exists():
 				return HttpResponseRedirect('/pyha/')
 		userRequest = Request.requests.get(id=requestNum)
+		if(userRequest.status == -1):
+			return HttpResponseRedirect('/pyha/')
 		if secrets.ROLE_2 in request.session.get("user_roles", [None]):
 				if not Collection.objects.filter(request=userRequest.id, customSecured__gt = 0, downloadRequestHandler__contains = str(userId), status__gte=0).count() > 0:
 					return HttpResponseRedirect('/pyha/')

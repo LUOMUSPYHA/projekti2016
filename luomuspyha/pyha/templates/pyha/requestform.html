@@ -319,6 +319,27 @@
 	</script>
 	
 
+	
+	<script>
+	$(document).ready(function(){
+	  $("#filterlist").on("hide.bs.collapse", function(){
+		$("#filterbutton").html('Näytä');
+	  });
+	  $("#filterlist").on("show.bs.collapse", function(){
+		$("#filterbutton").html('Piilota');
+	  });
+	});
+	</script>
+	
+	<!-- näytä kuvauksen muokkaus elementti jos kuvauksen pituus on 0 -->
+	
+	<script>
+	
+	
+	
+	</script>
+{% endblock %}
+{% block end_script %}
 	<script>
 		$('.deleteContainer').click(function(e){
 			var name ="#delete" + $(this).find('.removeCollectionButton').attr('id');
@@ -334,19 +355,7 @@
 			$(name).submit();
 		});
 	</script>
-	
-	<script>
-	$(document).ready(function(){
-	  $("#filterlist").on("hide.bs.collapse", function(){
-		$("#filterbutton").html('Näytä');
-	  });
-	  $("#filterlist").on("show.bs.collapse", function(){
-		$("#filterbutton").html('Piilota');
-	  });
-	});
-	</script>
-	
-	<!-- näytä kuvauksen muokkaus elementti jos kuvauksen pituus on 0 -->
+
 	<script>
 	$(document).ready(function(){
 		var descExists = {{ userRequest.description.strip|length }};
@@ -366,20 +375,6 @@
 		$("#descriptionButton").html('Piilota');
 	  });
 	});
-	</script>
-	
-	<script>
-	
-	
-	
-	</script>
-{% endblock %}
-{% block end_script %}
-	<script>
-		$('.deleteContainer').click(function(e){
-			var name ="#delete" + $(this).find('.removeCollectionButton').attr('id');
-			$(name).submit();
-		})
 	</script>
 {% endblock %}
 {% block modal %}
