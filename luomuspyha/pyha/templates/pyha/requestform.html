@@ -25,7 +25,7 @@
 								{% if userRequest.description and userRequest.description.strip %}
 									<textarea class="form-control" name = "description" id="description" rows="2" maxlength="200" style="width:50%;min-width:300px" >{{userRequest.description}}</textarea>
 								{% else %} 
-									<textarea class="form-control" name = "description" id="description" rows="2" maxlength="200" style="width:50%;min-width:300px" >Ei kuvausta</textarea>
+									<textarea class="form-control" name = "description" id="description" rows="2" maxlength="200" style="width:50%;min-width:300px" >{% trans "Ei kuvausta" %}</textarea>
 								{% endif %}
 								<!--<input type="text" class="form-control" id="description" name="description" 
 										value={{userRequest.description}} style="width: 300px;height: 50px"> -->
@@ -103,7 +103,7 @@
 									<div class="modal-content">
 									  <div class="modal-header">
 										<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-										<h4 class="modal-title" id="myModalLabel">{% trans "Sensitiivityyseen liityvät käyttöehdot" %}</h4>
+										<h4 class="modal-title" id="myModalLabel">{% trans "Sensitiivisyyteen liityvät käyttöehdot" %}</h4>
 									  </div>
 									  <div class="modal-body">
 										{% load static %}
