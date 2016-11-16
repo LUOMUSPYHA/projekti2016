@@ -29,8 +29,10 @@ def index(request):
 		if not logged_in(request):
 			return _process_auth_response(request,'')
 		userId = request.session["user_id"]
-		lang = request.LANGUAGE_CODE
-
+		if request.GET.get('lang'):
+			request.session["_language"] = request.GET.get('lang')		
+			return HttpResponseRedirect(request.path)
+			
 		if(lang == 'fi'):
 			title = 'Tervetuloa'
 		elif(lang == 'en'):
@@ -88,7 +90,6 @@ def _process_auth_response(request, indexpath):
 			return HttpResponseRedirect(settings.LAJIAUTH_URL+'login?target='+settings.TARGET+'&next='+str(indexpath))
 @csrf_exempt
 def receiver(request):
-		lang = request.LANGUAGE_CODE
 		if 'JSON' in request.POST:
 			text = request.POST['JSON']
 			jsond = text
@@ -96,6 +97,11 @@ def receiver(request):
 		else:
 			jsond = request.body.decode("utf-8")
 			req = store(jsond)
+		data = json.loads(jsond, object_hook=lambda d: Namespace(**d)) #kielen takia
+		if 'locale' in data:
+			lang = data.locale	
+		else:
+			lang = 'fi'
 		send_mail_after_receiving_request(req.id, lang)	
 		return HttpResponse('')
 
@@ -107,6 +113,10 @@ def show_request(request):
 		requestNum = os.path.basename(os.path.normpath(request.path))
 		if not logged_in(request):
 			return _process_auth_response(request, "request/"+requestNum)
+		if request.GET.get('lang'):
+			request.session["_language"] = request.GET.get('lang')		
+			return HttpResponseRedirect(request.path)
+			
 		userId = request.session["user_id"]
 		if 'handler' in request.session.get("user_role", [None]):			
 			if not Request.requests.filter(id=requestNum, status__gte=0).exists():
@@ -274,7 +284,7 @@ def check_all_collections_removed(requestId):
 
 def approve(request):
 	if request.method == 'POST':
-		lang = request.LANGUAGE_CODE
+		lang = 'fi' #ainakin toistaiseksi
 		requestId = request.POST.get('requestid')
 		requestedCollections = request.POST.getlist('checkb');
 		if(len(requestedCollections) > 0):
@@ -296,6 +306,8 @@ def approve(request):
 			userRequest.reason = request.POST.get('reason')
 			userRequest.status = 1
 			userRequest.save(update_fields=['status','reason'])
+			if userRequest.sensstatus == 1:
+				send_mail_for_approval_sens(requestId, lang)
 	return HttpResponseRedirect('/pyha/')
 
 def answer(request):
@@ -374,7 +386,13 @@ def update(requestId, lang):
 		if(statusBeforeUpdate!=wantedRequest.status):
 			send_mail_after_request_status_change_to_requester(wantedRequest.id, lang)
 			
-
+def check_language_parameter(request):
+	'''
+	Checks if request.GET has a language parameter
+	:returns: language code if it exists
+	'''	
+	
+	return request.GET.get('lang')
 
 
 
