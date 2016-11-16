@@ -29,6 +29,7 @@ def index(request):
 		if not logged_in(request):
 			return _process_auth_response(request,'')
 		userId = request.session["user_id"]
+		lang = request.LANGUAGE_CODE
 		if request.GET.get('lang'):
 			request.session["_language"] = request.GET.get('lang')		
 			return HttpResponseRedirect(request.path)
@@ -113,6 +114,7 @@ def show_request(request):
 		requestNum = os.path.basename(os.path.normpath(request.path))
 		if not logged_in(request):
 			return _process_auth_response(request, "request/"+requestNum)
+		lang = request.LANGUAGE_CODE	
 		if request.GET.get('lang'):
 			request.session["_language"] = request.GET.get('lang')		
 			return HttpResponseRedirect(request.path)
