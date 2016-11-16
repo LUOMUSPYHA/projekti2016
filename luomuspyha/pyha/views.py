@@ -205,24 +205,28 @@ def remove_sensitive_data(request):
 	if request.method == 'POST':
 		next = request.POST.get('next', '/')
 		collectionId = request.POST.get('collectionId')
+		requestId = request.POST.get('requestid')
 		collection = Collection.objects.all().get(id = collectionId)
 		collection.taxonSecured = 0;
 		collection.save(update_fields=['taxonSecured'])
 		if(collection.customSecured == 0):
 			collection.status = -1
 			collection.save(update_fields=['status'])
+			check_all_collections_removed(requestId)
 		return HttpResponseRedirect(next)
 
 def remove_custom_data(request):
 	if request.method == 'POST':
 		next = request.POST.get('next', '/')
 		collectionId = request.POST.get('collectionId')
+		requestId = request.POST.get('requestid')
 		collection = Collection.objects.all().get(id = collectionId)
 		collection.customSecured = 0;
 		collection.save(update_fields=['customSecured'])
 		if(collection.taxonSecured == 0):
 			collection.status = -1
 			collection.save(update_fields=['status'])
+			check_all_collections_removed(requestId)
 		return HttpResponseRedirect(next)
 
 
@@ -255,17 +259,18 @@ def removeCollection(request):
 		collection = Collection.objects.get(address = collectionId, request = requestId)
 		collection.status = -1
 		collection.save(update_fields=['status'])
-		
-		#check if all collections have status -1. If so set status of request to -1.
+		check_all_collections_removed(requestId)
+		return HttpResponseRedirect(redirect_path)
+
+
+
+#check if all collections have status -1. If so set status of request to -1.
+def check_all_collections_removed(requestId):
 		userRequest = Request.requests.get(id = requestId)
 		collectionList = userRequest.collection_set.filter(status__gte=0 )
 		if not collectionList:
 			userRequest.status = -1
 			userRequest.save(update_fields=['status'])
-			print("set request status to -1")
-			return HttpResponseRedirect('/pyha/')
-		else:
-			return HttpResponseRedirect(redirect_path)
 
 def approve(request):
 	if request.method == 'POST':
