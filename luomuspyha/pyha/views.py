@@ -26,13 +26,13 @@ from pyha.email import *
 
 @csrf_exempt
 def index(request):
+		if request.GET.get('lang'):
+			request.session["_language"] = request.GET.get('lang')
+			return HttpResponseRedirect(request.path)
 		if not logged_in(request):
 			return _process_auth_response(request,'')
 		userId = request.session["user_id"]
 		lang = request.LANGUAGE_CODE
-		if request.GET.get('lang'):
-			request.session["_language"] = request.GET.get('lang')		
-			return HttpResponseRedirect(request.path)
 		hasRole = secrets.ROLE_1 in request.session.get("user_roles", [None]) or secrets.ROLE_2 in request.session.get("user_roles", [None])
 		if 'handler' in request.session.get("user_role", [None]):
 			request_list = []
@@ -99,14 +99,14 @@ def jsonmock(request):
 		return render(request, 'pyha/mockjson.html')
 @csrf_exempt
 def show_request(request):
+		if request.GET.get('lang'):
+			request.session["_language"] = request.GET.get('lang')
+			return HttpResponseRedirect(request.path)
 		requestId = os.path.basename(os.path.normpath(request.path))
 		userRequest = Request.requests.get(id=requestId)
 		#Has Access
 		if not logged_in(request):
 			return _process_auth_response(request, "request/"+requestId)
-		if request.GET.get('lang'):
-			request.session["_language"] = request.GET.get('lang')		
-			return HttpResponseRedirect(request.path)
 		userId = request.session["user_id"]
 		if 'handler' in request.session.get("user_role", [None]):
 			if not Request.requests.filter(id=userRequest.id, status__gte=0).exists():
