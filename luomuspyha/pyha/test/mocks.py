@@ -226,7 +226,7 @@ JSON_MOCK4 = '''
 	],
 	"collections": [
 		{
-			"id": "http://tun.fi/HR.39",
+			"id": "http://tun.fi/HR.48",
 			"count": 1031,
 			"secureReasons": [
 
@@ -390,6 +390,97 @@ JSON_MOCK6 = '''
           "count": 2
         }
       }
+		}
+	]
+	}
+  '''
+  #jsonmock7:sta löytyy oikeat filtterit ja metadata-alkuinenkin filtteri
+JSON_MOCK7= '''
+  {
+	"id": "http://tun.fi/HBF.C60AB314-43E9-41F8-BB7D-0775773B16AB",
+	"source": "KE.398",
+	"email": "pyhatestaaja@gmail.com",
+	"personId":"MA.309",
+	"approximateMatches": 1742,
+	"downloadFormat": "CSV_FLAT",
+	"downloadIncludes": [
+	  "DOCUMENT_FACTS",
+	  "GATHERING_FACTS",
+	  "UNIT_FACTS"
+	],
+	"filters": [
+		{
+			"informalTaxonGroupId": [
+				"MVL.140",
+				"MVL.185"
+			]
+		},
+		{
+			"administrativeStatusId": [
+				"MX.finlex160_1997_appendix4"
+			]
+		},
+		{
+			"time": [
+				"2000/"
+			]
+		},
+		{
+			"secured": [
+				"true"
+			]
+		}
+	],
+	"collections": [
+		{
+			"id": "http://tun.fi/HR.39",
+			"count": 1031,
+			"secureReasons": [
+
+			"DEFAULT_TAXON_CONSERVATION",
+
+			"CUSTOM",
+
+			"DATA_QUARANTINE_PERIOD"
+
+			],
+			"mainSecureReasons": {
+        "DEFAULT_TAXON_CONSERVATION": {
+          "count": 3
+        },
+        "CUSTOM": {
+          "count": 2
+        }
+      }
+		},
+		{
+			"id": "http://tun.fi/HR.447",
+			"count": 904,
+			"secureReasons": [
+
+			"DEFAULT_TAXON_CONSERVATION",
+
+			"CUSTOM",
+
+			"DATA_QUARANTINE_PERIOD"
+
+			],
+			"mainSecureReasons": {
+        "CUSTOM": {
+          "count": 1
+        }
+      }
+		},
+		{
+			"id": "http://tun.fi/HR.60",
+			"count": 14,
+			"secureReasons": [
+
+			"CUSTOM",
+
+			"DATA_QUARANTINE_PERIOD"
+
+			]
 		}
 	]
 	}

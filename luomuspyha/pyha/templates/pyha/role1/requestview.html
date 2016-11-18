@@ -6,12 +6,9 @@
 		<div class="col-sm-9 col-lg-10">
 		  <div class="page-header"> 
 
-			<h1>{% trans "Pyyntö" %}:
-				{% if userRequest.description and userRequest.description.strip %}
-					{{userRequest.description}}
-					<button class= "btn btn-default btn-xs" data-toggle="collapse" data-target="#descriptionEdit" id="descriptionButton"><span class="glyphicon glyphicon-pencil"></span></button>
-				{% else %}
-				{% endif %}
+			<h1>{% trans "Pyyntö käyttäjältä" %}
+				{{request_owner}},
+				{{request_owners_email}}
 			</h1>
 					
 				<h2>{{userRequest.date|date:"d.m.Y    H:i"}}</h2>
@@ -52,7 +49,7 @@
 		  </div>
 
 		  
-				<h2>{% trans "Pyynnön rajaukset" %}</h2>
+				<h3>{% trans "Pyynnön rajaukset" %}</h3>
 
 				<button class= "btn btn-default" data-toggle="collapse" data-target="#filterlist" id="filterbutton">{% trans "Näytä" %}</button>
 				<div id="filterlist" class="collapse">
@@ -64,7 +61,7 @@
 							</tr>	
 							{% for filter in filters %}
 							<tr>	
-								<td rowspan={{filter.1|length}}>{{ filter.0 }}</td>
+								<td rowspan={{filter.1|length}}>{{ filter.2 }}</td>
 								{% for f in filter.1 %}
 								<td>{{ f }}</td>
 							</tr>
@@ -84,15 +81,12 @@
 				<!-- aineistolista -->
 				{% if collections %}
 					{% if taxon %}
-						<h3>{% trans "Pyyntöön on sisältynyt sensitiivistä tietoa" %}:</h3>
-						<p>{% trans "Aineistot, jotka sisältävät sensitiivistä tietoa ovat merkattu kuvakkeella"%}. <span class="glyphicon glyphicon-eye-open" style="color:red;"></span></p> 
-						<button type="button" class="btn btn-default btn-sm" required data-toggle="modal" data-target="#myModalsens">{% trans "Ehdot" %}</button>
-								<div class="modal fade" id="myModalsens"" tabindex="-1" role="dialog" aria-labelledby="sensiModalLabel">
+								<div class="modal fade" id="myModalsens" tabindex="-1" role="dialog" aria-labelledby="sensiModalLabel">
 								  <div class="modal-lg modal-dialog" role="document">
 									<div class="modal-content">
 									  <div class="modal-header">
 										<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-										<h4 class="modal-title" id="myModalLabel">{% trans "Sensitiivityyseen liityvät käyttöehdot" %}</h4>
+										<h4 class="modal-title" id="myModalLabel">{% trans "Sensitiivisyyteen liityvät käyttöehdot" %}</h4>
 									  </div>
 									  <div class="modal-body">
 										{% load static %}
@@ -112,9 +106,13 @@
 							<h3>{% trans "Pyytäjä ei halua sensitiivistä tietoa"%}</h3>
 							{% else %}
 							<h3>{% trans "Pyytäjä haluaa sensitiivistä tietoa"%}</h3>
+							<h4>{% trans "Aineistot:"%}</h3>
+							{% for collection in collections %}
+								<p>{{collection.result.collectionName}}<p>
+							{% endfor %}
 							<table class="table" style="width:100%">
 								<tr style=color:black>
-								<th>{% trans "Status" %}</th>
+								<th>{% trans "Käsittelyn tila" %}</th>
 								<th>{% trans "Perustelut päätökselle" %}</th>
 								</tr>
 								{% if userRequest.sensstatus == 1 %}
@@ -144,7 +142,7 @@
 										<input type="hidden" id="collectionid" name="collectionid" value="sens">
 										<input type="hidden" id="next" name="next" value={{request.path}}>
 										<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
-										<textarea class="form-control" rows="5" cols="700" id="reason" name="reason" required >{{userRequest.sensDecisionExplanation}}</textarea>
+										<textarea class="form-control" rows="5" cols="700" id="reason" name="reason" required >{% if userRequest.sensDecisionExplanation %}{{userRequest.sensDecisionExplanation}}{% else %}{% endif %}</textarea>
 										<button type="submit" id="submit" name="answer" value=1 class="btn btn-default btn-sm">{% trans "Hyväksy" %}</button>
 										<button type="submit" id="submit" name="answer" value=0 class="btn btn-default btn-sm">{% trans "Hylkää" %}</button>
 									</div>
@@ -156,12 +154,13 @@
 							{% endif %}
 					{% endif %}
 				<br></br>
-				<h2>{% trans "Pyyntöön sisältyvät aineistot" %}:</h2>
+					{% if role2 and collectioncount > 0%}
+					<h2>{% trans "Pyyntöön sisältyvät aineistot" %}:</h2>
 						<table class="table" style="width:100%">
 							<tr style=color:black>
-								<th>{% trans "Nimi" %}</th>
+								<th>{% trans "Aineisto" %}</th>
 								<th>{% trans "Kuvaus" %}</th>
-								<th>{% trans "Status" %}</th>
+								<th>{% trans "Käsittelyn tila" %}</th>
 								<th>{% trans "Ehdot" %}</th>
 								<th>{% trans "Perustelut päätökselle" %}</th>
 							</tr>
@@ -176,7 +175,7 @@
 								<tr	
 								{% endif %}
 								>
-								<td>{{collection.result.collectionName}}{% if collection.taxonSecured > 0 %} <span class="glyphicon glyphicon-eye-open" style="color:red;"></span> {% endif %}</td>
+								<td>{{collection.result.collectionName}}</td>
 								<td>{{collection.result.description}}</td>
 								
 								{% if collection.status == 1 %}
@@ -196,7 +195,7 @@
 										<input type="hidden" id="collectionid" name="collectionid" value={{collection.address}}>
 										<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
 										<input type="hidden" id="next" name="next" value={{request.path}}>
-										<textarea class="form-control" rows="5" cols="700" id="reason" name="reason" required >{{collection.decisionExplanation}}</textarea>
+										<textarea class="form-control" rows="5" cols="700" id="reason" name="reason" required >{% if collection.decisionExplanation %}{{collection.decisionExplanation}}{% else %}{% endif %}</textarea>
 										<button type="submit" id="submit" name="answer" value=1 class="btn btn-default btn-sm">{% trans "Hyväksy" %}</button>
 										<button type="submit" id="submit" name="answer" value=0 class="btn btn-default btn-sm">{% trans "Hylkää" %}</button>
 									</div>
@@ -224,8 +223,8 @@
 							</tr>
 							{% endfor %}
 						</table>
+						{% endif %}
 						</div>
-
 					{% else %}
 						<strong> {% trans "Kannassa ei ole aineistoja tälle pyynnölle" %}.</strong>
 					{% endif %}

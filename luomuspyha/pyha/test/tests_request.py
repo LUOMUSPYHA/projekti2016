@@ -46,8 +46,56 @@ class RequestTesting(TestCase):
 
 	def test_requests_collections_are_shown_in_its_page(self):
 		response = self.client.get('/pyha/request/1')
-		self.assertContains(response, "Pyyntöön sisältyvät aineistot:")
+		self.assertContains(response, "Pyyntöösi sisältyvät havainnot:")
 		self.assertContains(response, "Talvilintulaskenta")
 		self.assertContains(response, "Hatikka.fi")
 		self.assertContains(response, "Lintujen ja nisäkkäiden ruokintapaikkaseuranta")
 		
+	def test_collection_has_correct_secure_reason_amounts(self):
+		warehouse.store(JSON_MOCK6)
+		col = Collection.objects.all().get(address="colcustomsec1")
+		self.assertEqual(col.customSecured, 1)
+		self.assertEqual(col.taxonSecured, 0)
+		
+	def test_collection_has_correct_secure_reason_amounts2(self):
+		warehouse.store(JSON_MOCK6)
+		col = Collection.objects.all().get(address="colsecured")
+		self.assertEqual(col.customSecured, 2)
+		self.assertEqual(col.taxonSecured, 3)
+		
+	def test_collections_sensitive_secure_reasons_can_be_deleted(self):
+		warehouse.store(JSON_MOCK6)
+		col = Collection.objects.all().get(address="colsecured")
+		self.assertEqual(col.customSecured, 2)
+
+		response = self.client.post('/pyha/removeCustom', {'collectionId': col.id})
+		col = Collection.objects.all().get(address="colsecured")
+
+		self.assertEqual(col.customSecured, 0)
+		
+
+	def test_collections_sensitive_secure_reasons_can_be_deleted(self):
+		warehouse.store(JSON_MOCK6)
+		col = Collection.objects.all().get(address="colsecured")
+		self.assertEqual(col.taxonSecured, 3)
+
+		response = self.client.post('/pyha/removeSens', {'collectionId': col.id})
+		col = Collection.objects.all().get(address="colsecured")
+
+		self.assertEqual(col.taxonSecured, 0)
+
+	def test_requests_filters_labels_and_values_comes_from_apitest(self):
+		warehouse.store(JSON_MOCK7)
+		response = self.client.get('/pyha/request/2')
+		print(response)
+		self.assertContains(response, "Pyyntösi rajaukset:")
+		self.assertContains(response, "Vain salatut")
+		self.assertContains(response, "true")
+		self.assertContains(response, "Lajin hallinnollinen rajaus")
+		self.assertContains(response, "Uhanalainen laji (LSA Liite 4)")
+		self.assertContains(response, "Lajiryhmä")
+		self.assertContains(response, "Käet")
+		self.assertContains(response, "Jyrsijät")
+		self.assertContains(response, "Aika")
+		self.assertContains(response, "2000/")
+
