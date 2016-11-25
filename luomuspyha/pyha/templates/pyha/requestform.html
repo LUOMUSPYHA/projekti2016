@@ -170,12 +170,7 @@
 								<td><span id ="statustext{{ forloop.counter0 }}">{% trans "Et ole hyväksynyt ehtoja" %}</span></td> 
 								<td>
 								<!-- submit button for hidden delete collection form -->
-								<div class="deleteContainer">
-									<button class="removeCollectionButton" id="form{{ forloop.counter0 }}" type="button" ><span class="glyphicon glyphicon-trash"></span></button>
-									{% trans "Poista aineistot, joiden ehtoja et halua hyväksyä" %}
-								</div>
-								</td>
-								
+
 								<!-- Modal -->
 								<div class="modal fade" id="myModal{{ forloop.counter0 }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 								  <div class="modal-lg modal-dialog" role="document">
