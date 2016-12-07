@@ -193,6 +193,7 @@
 										</div> 
 
 										<div class="tab-pane" role="tabpanel" id="step2">
+										{% if custom %}
 											<h3>{% trans "secured_collections_in_request" %}:</h3>
 												<table class="table" style="width:100%">
 													<tr style=color:black>				
@@ -250,6 +251,9 @@
 													</tr>
 													{% endfor %}
 												</table>
+											{% else %}
+											<h3>{% trans "no_custom_secure_reasons_continue_to_step_3"%}</h3>
+											{% endif %}
 											<input type="hidden" id="requestid" name="requestid" value={{userRequest.id}}>
 											<ul class="list-inline pull-right">
 												<li><button type="button" class="btn btn-default prev-step">{% trans 'previous'%}</button></li>

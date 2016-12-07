@@ -210,13 +210,16 @@ def create_request_view_context(request, userRequest, userId, role1, role2):
 		collectionList = []
 		create_collections_for_lists(request, taxonList, customList, collectionList, userRequest, userId, role1, role2)
 		taxon = False
+		custom = False
 		for collection in collectionList:
 			if(collection.taxonSecured > 0):
 				taxon = True
+			if(collection.customSecured > 0):
+				custom = True
 		hasRole = role1 or role2
 		request_owner = fetch_user_name(userRequest.user)
 		request_owners_email = fetch_email_address(userRequest.user)
-		context = {"taxonlist": taxonList, "customlist": customList, "taxon": taxon, "role": hasRole, "role1": role1, "role2": role2, "email": request.session["user_email"], "userRequest": userRequest, "requestLog_list": requestLog(request), "filters": show_filters(request), "collections": collectionList, "static": settings.STA_URL, "request_owner": request_owner, "request_owners_email": request_owners_email}
+		context = {"taxonlist": taxonList, "customlist": customList, "taxon": taxon, "custom": custom, "role": hasRole, "role1": role1, "role2": role2, "email": request.session["user_email"], "userRequest": userRequest, "requestLog_list": requestLog(request), "filters": show_filters(request), "collections": collectionList, "static": settings.STA_URL, "request_owner": request_owner, "request_owners_email": request_owners_email}
 		return context
 
 def get_values_for_collections(request, List):
