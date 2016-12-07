@@ -186,7 +186,7 @@
 												{% endif %}
 												<ul class="list-inline pull-right">               
 													<li><span id ="statustextsens">{% trans "you_have_not_accepted_terms" %}</span></li>
-													<li><button type="button" class="btn btn-primary next-step">{% trans 'continue_to_step_2' %}</button></li>
+													<li><button id="submitbutton" type="button" disabled="disabled"class="btn btn-primary next-step">{% trans 'continue_to_step_2' %}</button></li>
 											</ul>
 											<script>checksens();</script>
 											</div>
@@ -370,10 +370,13 @@
 		  nonapprovetext = "{% trans 'you_have_not_accepted_terms' %}";
 		  if(document.getElementById('checkbsens').checked){
 			  document.getElementById('statustextsens').textContent=approvetext;
+			  document.getElementById('submitbutton').disabled = false;
 			  acceptedsens = 1;
 		  }else{
 			  document.getElementById('statustextsens').textContent=nonapprovetext;
+			  document.getElementById('submitbutton').disabled = true;
 			  acceptedsens = 0;
+
 		}
 	  }
 	  function check(counter) { 
