@@ -407,10 +407,8 @@ msgid "send_to_be_accepted"
 msgstr "Send to be accepted"
 
 #: pyha/templates/pyha/requestform.html:163
-#, fuzzy
-#| msgid "you_have_to_accept_at_least_one_terms"
 msgid "you_have_to_accept_or_delete_all_terms"
-msgstr "You have to accept at least one terms of use"
+msgstr "You have to accept or delete all terms"
 
 #: pyha/templates/pyha/requestform.html:185
 msgid "are_you_sure_you_want_to_remove_collection"
@@ -509,16 +507,12 @@ msgstr ""
 "requests title will be the requests date"
 
 #: pyha/templates/pyha/requestview.html:99
-#, fuzzy
-#| msgid "log_sensitives_deleted"
 msgid "log_sensitive_data_handler"
-msgstr "Sensitive data removed"
+msgstr "Sensitive data handler"
 
 #: pyha/templates/pyha/requestview.html:101
-#, fuzzy
-#| msgid "request_date"
 msgid "log_collection_provider"
-msgstr "Request denied"
+msgstr "collection provider"
 
 #: pyha/templates/pyha/requestview.html:103
 msgid "log_sensitive_and_collections_handler"
@@ -563,8 +557,6 @@ msgstr "Admission for sensitive data"
 #~ msgid "User wants sensitive data"
 #~ msgstr "User wants sensitive data"
 
-#, fuzzy
-#~| msgid "list_of_collections"
 #~ msgid "Delete_this_collection"
 #~ msgstr "Collections including sensitive data:"
 
