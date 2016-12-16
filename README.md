@@ -1,4 +1,5 @@
 ﻿# projekti2016
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/LUOMUSPYHA/projekti2016.svg?branch=master)](https://travis-ci.org/LUOMUSPYHA/projekti2016)
 ##Suomen Lajitietokeskuksen viranomaisaineistojen luovutuspyyntöjen hallinta
 ####Ohjelmistotuotantoprojekti (Helsingin yliopisto, tietojenkäsittelytieteen laitos)
